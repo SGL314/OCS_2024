@@ -1,0 +1,58 @@
+nop > save
+
+-- setting
+mvi a,09h
+mvi b,05h
+-- saving
+out 03h
+sta < save
+mov a,b
+out 4h
+lda < save
+-- CODE
+-- l
+call < exp_a_b
+hlt
+
+-- CALLS
+
+-- mult_a_b
+nop > mult_a_b
+nop > m1
+nop > m2
+
+mov c,a
+mvi a,0h
+inr b
+dcr b
+jz < end
+add c > ak
+dcr b
+jnz < ak
+nop > end
+ret
+
+-- exponenciacao
+nop > exp_a_b
+nop > m1
+nop > m2
+nop > m3
+
+sta < m1
+sta < m3
+mov a,b
+sta < m2
+
+nop > init_loop
+
+lda < m3
+mov c,a
+mov b,a
+add b
+dcr c
+jnz < init_loop
+
+lda < m3
+
+ret
+

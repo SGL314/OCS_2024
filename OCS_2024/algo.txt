@@ -1,0 +1,55 @@
+-- Escreva um programa fonte que carrega o acumulador com o decimal 1 e depois vá apresentando valores até 10.
+mvi a,09h
+mvi b,01h 
+inr b >   apo k
+dcr a 
+jmp < apo
+hlt
+
+
+-- addresses that change : set a as 1 put 1,2,3 in the memorys 2k1h,2k2h,2k3h and get them after using 'addresses that change'
+mvi a,01h
+mvi c,03h
+-- loop
+nop > init
+sta <1 loop
+jmp < loop
+sta 2000h > loop
+inr a
+dcr c
+jnz < init
+
+-- end loop
+lda 2003h
+mov c,a
+lda 2002h
+mov b,a
+lda 2001h
+hlt
+
+-- enjoying with the pointers
+mvi c,03h 
+inr b  > init
+dcr c > init
+jz < end
+jmp < init
+hlt > end
+
+-- dobra numeros
+nop > dobra_a
+nop > m1
+nop > m2
+
+sta < m1
+mov a,b
+sta < m2
+
+lda < m1
+mov b,a
+add b
+sta < m1
+lda < m2
+mov b,a
+lda < m1
+ret
+

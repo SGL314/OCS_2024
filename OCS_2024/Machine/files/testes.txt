@@ -1,0 +1,48 @@
+-- Escreva um programa fonte que carrega o acumulador com o decimal 0 e depois vá acrescentando valores de 1 até 10. somatorio
+mvi a,00h
+mvi b,22h
+mvi c,23h
+sta 4000h
+mov a,b
+sta 4001h
+lda 4000h
+lda 4000h > address
+add b
+sta 4000h
+dcr c
+mov a,c
+inr b
+jnz < address
+lda 4000h
+dcr b
+sta 4002H
+lda 4001h
+mov c,a
+lda 4002h
+hlt
+
+
+-- Escreva um programa fonte que carrega o acumulador com o decimal 1 e depois vá acresentando valores até 10.
+mvi a,09h
+mvi b,01h 
+inr b >   apo k
+dcr a 
+jnz < apo
+hlt
+
+
+mvi a,00h
+mvi b,22h
+mvi c,22h
+sta 4000h
+lda 4000h > apo
+add b
+sta 4000h
+dcr c
+mov a,c
+inr b
+jnz < apo
+lda 4000h
+hlt
+
+

@@ -1,0 +1,6 @@
+AST upperAllLetters_when_showMnemonics true
+AST showMnemonics true
+AST showPointers false
+ACST compileACST false
+ACST compileAST false
+ACST compileCST false
