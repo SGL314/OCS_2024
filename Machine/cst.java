@@ -40,9 +40,7 @@ public class cst {
         return ret;
     }
     public static String hex(String number){
-        String ret = Integer.toString(number,16).toUpperCase();
-        if (ret.length()==1) return "0"+ret;
-        return ret;
+        return "";
     }
 
     public static int integer(String number){
@@ -146,14 +144,14 @@ public class cst {
         
         switch (entry){
             case "80": // ADD B
-                A += B;
+                A = sum(A,B);
                 setFlags("A");
                 break;
             case "47": // MOV B,A
                 B = A;
                 break;
             case "81": // ADD C
-                A += C;
+                A = sum(A,C);
                 setFlags("A");
                 break;
             case "41": // MOV B,C
@@ -173,7 +171,7 @@ public class cst {
             // case "E6": // ANI byte
             //     break;
             case "3E": // MVI A,byte
-                A = integer(first);
+                A = h2b(first);
                 return 1;
             case "CD": // CALL address
                 String address = hex(PC);
@@ -181,25 +179,25 @@ public class cst {
                 Memory.set(integer("FFFF")-1,address.substring(0,2));
                 return -1+integer(second+first)-PC;
             case "06": // MVI B,byte
-                B = integer(first);return 1;
+                B = h2b(first);return 1;
             // case "2F": // CMA
             //     break;
             case "0E": // MVI C,byte
-                C = integer(first);return 1;
+                C = h2b(first);return 1;
             case "3D": // DCR A
-                A--;
+                A = sum(A,);
                 setFlags("A");
                 break;
             case "00": // NOP
                 break;
             case "05": // DCR B
-                B--;
+                B = sum(B,);
                 setFlags("B");
                 break;
             // case "BO": // ORA B
             //     break;
             case "0D": // DCR C
-                C--;
+                C = sum(C,);
                 setFlags("C");
                 break;
             // case "BI": // ORA C
@@ -258,7 +256,7 @@ public class cst {
             // case "A8": // XRA B
             //     break;
             case "3A": // LDA address
-                A = integer(Memory.get(integer(second+first)));return 2;
+                A = h2b(Memory.get(integer(second+first)));return 2;
             // case "A9": // XRA C
             //     break;
             case "78": // MOV A,B
@@ -286,20 +284,20 @@ public class cst {
             case "A":
                 flagSignal = 1;
                 flagZero = 1;
-                if (A >= 0) flagSignal = 0;
-                if (A != 0) flagZero = 0;
+                if (b2d(A).toCharArray()[0] != '-') flagSignal = 0;
+                if (b2d(A) != "0") flagZero = 0;
                 break;
             case "B":
                 flagSignal = 1;
                 flagZero = 1;
-                if (B >= 0) flagSignal = 0;
-                if (B != 0) flagZero = 0;
+                if (b2d(B).toCharArray()[0] != '-') flagSignal = 0;
+                if (b2d(B) != "0") flagZero = 0;
                 break;
             case "C":
                 flagSignal = 1;
                 flagZero = 1;
-                if (C >= 0) flagSignal = 0;
-                if (C != 0) flagZero = 0;
+                if (b2d(C).toCharArray()[0] != '-') flagSignal = 0;
+                if (b2d(C) != "0") flagZero = 0;
                 break;
         }
     }
@@ -350,6 +348,124 @@ public class cst {
             }
         }
 
+    }
+    // Numberis
+    public static String b2h(String a){
+        char[] parts = "....".toCharArray();
+        String[] hexs = "0123456789ABCDEF".split("");
+        int j=0;
+        String result = "",got="";
+        for (int i=a.length()-1;i>=0;i--){
+            parts[3-j] = a.toCharArray()[i];
+            if (j==3){
+                int n = Integer.parseInt(b2d("0"+toString(parts)));
+                //System.out.println(n);
+                result = hexs[n]+result; 
+                j=0;
+            }else j++;
+        }
+        if (j != 0){
+            got = a.substring(1,j+1);
+            int n = Integer.parseInt(b2d("0"+toString(parts)));
+            result = hexs[n]+result; 
+        }
+        return result;
+    }
+
+    public static String b2d(String a){
+        String result = "0",step1;
+        int exp = 0,expNow;
+        for (int i=a.length()-1;i>0;i--){
+            expNow = exp;
+            step1 = ""+a.toCharArray()[i];
+            while (expNow > 0){
+                step1 = mult(step1,"2");
+                expNow--;
+            }
+            result = sum(result,step1);
+            exp++;
+        }
+        if (a.toCharArray()[0] == '1') result = '-'+result;
+        return result;
+    }
+
+    public static String h2b(String a){
+        String b = "";
+        String[] hexs = "0123456789ABCDEF".split("");
+        int j=0;
+        String result = "",got="";
+        for (int i=a.length()-1;i>=0;i--){
+            int p=0;
+            for (String str : hexs){
+                if (str.equals(a.toCharArray()[i]+"")) break;
+                p++;
+            }
+            got = Integer.toString(p,2);
+            while (got.length() < 4) got = "0"+got;
+            b = got + b;// 
+        }
+        result = b;
+        return result;
+    }
+
+    public static String mult(String a,String b){
+        String result = "",step2= "";
+        String cacheZeros = "", cacheZerosA = "";
+        int cache = 0,step1=0;
+        //if (min(a.length(),b.length()) == a.length() && a.length() != b.length()) return mult(b,a);
+        for (int i=1;i<=b.length();i++){
+            step2 = "";
+            cacheZerosA = "";
+            for (int j=1;j<=a.length();j++){
+                step1 = Integer.parseInt(""+b.toCharArray()[b.length()-i])*Integer.parseInt(""+a.toCharArray()[a.length()-j])+cache;
+                cache = 0;
+                if (step1 >= 10){
+                    cache = (step1-step1%10)/10;
+                }
+                step2 = ""+sum(""+step1%10+cacheZerosA+cacheZeros,step2);
+
+                
+                cacheZerosA += "0";
+            }
+            //System.out.println(">"+step2);
+            
+            result = sum(step2,result);
+           // System.out.println(":"+result);
+            if (cache != 0) result = sum(cache+cacheZeros+cacheZerosA,result);
+            cacheZeros += "0";
+        }
+        return result;
+    }
+    
+    public static String sum(String a,String b){
+        String result = "";
+        int cache = 0,step1=0;
+        if (min(a.length(),b.length()) == b.length()){
+            while (a.length() != b.length()&& a.length() != b.length()){
+                b = "0"+b;
+            }
+        }else return sum(b,a);
+        for (int i=1;i<=min(a.length(),b.length());i++){
+            step1 = Integer.parseInt(""+a.toCharArray()[a.length()-i])+Integer.parseInt(""+b.toCharArray()[b.length()-i])+cache;
+            cache = 0;
+            if (step1 >= 10){
+                cache = (step1-step1%10)/10;
+            }
+            result = ""+step1%10 +result;
+        }
+        if (cache != 0) result = cache+result;
+        return result;
+    }
+    public static int min(int a,int b){
+        if (a > b) return b;
+        return a;
+    }
+    public static String toString(char[] chars){
+        String word = "";
+        for ( char c : chars){
+            word = word + c;
+        }
+        return word;
     }
 
 }
