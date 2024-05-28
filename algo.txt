@@ -53,3 +53,22 @@ mov b,a
 lda < m1
 ret
 
+-- mult_a_b
+nop > mult_a_b
+nop > m1
+nop > m2
+
+mov c,a
+mvi a,0h
+inr b
+dcr b
+jz < end
+add c > ak
+dcr b
+jnz < ak
+nop > end
+ret
+
+
+
+

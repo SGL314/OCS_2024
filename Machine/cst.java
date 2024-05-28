@@ -1,5 +1,7 @@
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.lang.Thread;
@@ -7,19 +9,20 @@ import java.lang.Thread;
 // CPU of the SAP 2 _ cst
 public class cst {
     public static String[] mnemonics = {"ADD B","MOV B,A","ADD C","MOV B,C","ANA B","MOV C,A","ANA C","MOV C,B","ANI byte","MVI A,byte","CALL address","MVI B,byte","CMA","MVI C,byte","DCR A","NOP","DCR B","ORA B","DCR C","ORA C","HLT","ORI byte","IN byte","OUT byte","INR A","RAL","INR B","RAR","INR C","RET","JM address","STA address","JMP address","SUB B","JNZ address","SUB C","JZ address","XRA B","LDA address","XRA C","MOV A,B","XRI byte","MOV A,C"};
-    public static String[] codes = {"80","47","81","41","A0","4F","A1","48","E6","3E","CD","06","2F","OE","3D","00","05","BO","OD","BI","76","F6","DB","D3","3C","17","04","1F","OC","C9","FA","32","C3","90","C2","91","CA","A8","3A","A9","78","EE","79"};
+    public static String[] codes = {"80","47","81","41","A0","4F","A1","48","E6","3E","CD","06","2F","0E","3D","00","05","B0","0D","BI","76","F6","DB","D3","3C","17","04","1F","0C","C9","FA","32","C3","90","C2","91","CA","A8","3A","A9","78","EE","79"};
     public static String[] mnemonicsReserved = mnemonics.clone();
     public static ArrayList<String> Memory = new ArrayList<String>();
 
-    public static int A = 0;public static int B = 0;public static int C = 0;
+    public static String A = "0", B = "0", C = "0";
     public static int PC = 0;
-    public static int positionSubroutine = 0;
     public static int flagSignal;
     public static int flagZero;
     public static long time=0;
-    public static int[] outs = {0,0,0};
+    public static String[] outs = {"0","0","0"};
 
-    // errors 3
+    public static boolean stepMnemonic = true,clearTerminal_when_stepInEachMnemonic = false;
+
+    // errors 8
 
     public static void errors(int error,String saida){
         System.out.printf("\nCST ERROR %03d : %s\n",error,saida);
@@ -27,6 +30,16 @@ public class cst {
     }
 
     public static String hex(int number){
+        String ret = Integer.toString(number,16).toUpperCase();
+        if (ret.length()==1) return "0"+ret;
+        return ret;
+    }
+    public static String hex(long number){
+        String ret = Integer.toString((int) number,16).toUpperCase();
+        if (ret.length()==1) return "0"+ret;
+        return ret;
+    }
+    public static String hex(String number){
         String ret = Integer.toString(number,16).toUpperCase();
         if (ret.length()==1) return "0"+ret;
         return ret;
@@ -39,6 +52,7 @@ public class cst {
     public static void main(String[] args){
         System.out.println("\n__CST__");
         time = System.currentTimeMillis();
+        setConfigurations();
         // Preset
         for (int i=0;i<mnemonics.length;i++){
             mnemonics[i] = mnemonics[i].replace(" ","");
@@ -79,10 +93,25 @@ public class cst {
                 PC = init;
                 // Execute
                 while (PC<Memory.size()){
+                    int j = 0;
+                    for (String code : codes){
+                        if (code.equals(Memory.get(PC))) break;
+                        j++;
+                    }
+                    
+
                     if (PC+2<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),Memory.get(PC+2));
                     else if (PC+1<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),"_NONE_");
                     else PC = PC + execute(Memory.get(PC),"_NONE_","_NONE_");
+                    
+                    if (stepMnemonic){
+                        if (clearTerminal_when_stepInEachMnemonic) clearTerminal();
+                        System.out.printf("%s\n%sH %sH %sH \n",mnemonicsReserved[j],hex(A),hex(B),hex(C));
+                        sleep(0.005f);
+                    }
+
                     PC++;
+
                 }
 
                 read.close();
@@ -90,13 +119,24 @@ public class cst {
                 errors(2,"This format of input is not available");
             }
         } catch (Exception e){
-            System.out.println("Something went wrong, call the developer\n__ERROR not defined__\n\n"+e);
-            return;
+            if ((e+"").equals("java.lang.NumberFormatException: Sign character in wrong position")){
+                errors(8,"Intern Stack Overflow");
+            }else{
+                System.out.println("Something went wrong, call the developer\n__ERROR not defined__\n\n"+e);
+                return;
+            }
         }
         System.out.printf("Read all of the memory\nA : %sH (%d)\nB : %sH (%d)\nC : %sH (%d)\nOUT 03H : %sH (%d)\nOUT 04H : %sH (%d)\n",hex(A),A,hex(B),B,hex(C),C,hex(outs[0]),outs[0],hex(outs[1]),outs[1]);
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
     }
     // Ececution
+
+    public static void clearTerminal(){
+        for (int i=0;i<15;i++){
+            System.out.println("\n");
+        }
+        sleep(0.1666f);
+    }
 
     public static void sleep(float timeSleep){
         try { Thread.sleep((int) (timeSleep*1000)); } catch (Exception e) {}
@@ -136,7 +176,9 @@ public class cst {
                 A = integer(first);
                 return 1;
             case "CD": // CALL address
-                positionSubroutine = PC;
+                String address = hex(PC);
+                Memory.set(integer("FFFE")-1,address.substring(2));
+                Memory.set(integer("FFFF")-1,address.substring(0,2));
                 return -1+integer(second+first)-PC;
             case "06": // MVI B,byte
                 B = integer(first);return 1;
@@ -190,10 +232,9 @@ public class cst {
                 setFlags("C");
                 break;
             case "C9": // RET
-                int positionSubroutineNow = positionSubroutine;
-                positionSubroutine = 0;
+                int positionSubroutineNow = integer(""+Memory.get(integer("FFFF")-1)+Memory.get(integer("FFFE")-1));
                 return positionSubroutineNow-PC+2;
-            case "FA": // JM address
+            case "FA": // JM address   
                 if (flagSignal == 1) return -1+(integer(second+first)-PC);
                 return 2;
             case "32": // STA address
@@ -205,7 +246,7 @@ public class cst {
                 setFlags("A");
                 break;
             case "C2": // JNZ address
-                if (flagZero == 0) return -1+(integer(second+first)-PC);
+                if (flagZero == 0) return -1+integer(second+first)-PC;
                 return 2;
             case "91": // SUB C
                 A -= C;
@@ -262,6 +303,55 @@ public class cst {
                 break;
         }
     }
+
+    public static void setConfigurations(){
+        File config = new File("config.txt");
+        Scanner read = null;
+        try {
+            read = new Scanner(config);
+        } catch (Exception e){
+            errors(4, "Can't open 'config.txt'\nCheck if this file exists and has the extension '.txt'");
+        }
+        ArrayList<String> lines = new ArrayList<String>();
+        while (read.hasNextLine()){
+            lines.add(read.nextLine());
+        }
+        
+        for (String line : lines){
+            if (!(line.split(" ")[0].equals("CST"))) continue;
+            String configurationStr = line.split(" ")[1];
+            String valueStr = "";
+            try{
+                valueStr = line.split(" ")[2];
+            } catch (Exception e){
+                errors(5,"Occured a problem when reading a configuration (value): '"+line+"'");
+            }
+            boolean value=false;
+            switch (valueStr){
+                case "true":
+                    value = true;
+                    break;
+                case "false":
+                    value = false;
+                    break;
+                default:
+                    errors(6,"Occured a problem identifying a configuration (value): '"+line+"'");
+            }
+            switch (configurationStr){
+                case "stepInEachMnemonic":
+                    stepMnemonic = value;
+                    break;
+                case "clearTerminal_when_stepInEachMnemonic":
+                    clearTerminal_when_stepInEachMnemonic = value;
+                    break;
+                default:
+                    errors(7,"Occured a problem when reading a configuration (configuration): '"+line+"'");
+
+            }
+        }
+
+    }
+
 }
 // By SGL
 // 24/05/2024

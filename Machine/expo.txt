@@ -1,7 +1,7 @@
 nop > m1
 -- setting
-mvi a,11h
-mvi b,04h > m2
+mvi a,2h
+mvi b,1Eh > m2
 -- saving
 out 03h > soma
 sta < m1
@@ -40,7 +40,6 @@ dcr a
 sta < qt_times
 jnz < loop2
 -- end
-lda < soma
 mov a,b
 mvi b,0h
 

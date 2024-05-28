@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.io.IOException;
 
 // Assembler asd CPU of the SAP 2 _ ast
 public class acst{

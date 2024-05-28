@@ -1,6 +1,8 @@
-AST upperAllLetters_when_showMnemonics true
-AST showMnemonics true
-AST showPointers false
 ACST compileACST false
 ACST compileAST false
-ACST compileCST false
+ACST compileCST true
+AST upperAllLetters_when_showMnemonics true
+AST showMnemonics true
+AST showPointers true
+CST stepInEachMnemonic false
+CST clearTerminal_when_stepInEachMnemonic false
