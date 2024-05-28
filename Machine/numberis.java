@@ -1,11 +1,26 @@
 public class numberis {
     public static void main (String[] args){
-        String a,b;
-        a = "00010011";
-        b = "10000101";
-        System.out.println(sumB(a,b));
+        String a,b,soma,sub;
+        a = "0000";
+        b = "01";
+        System.out.println(b2h(a));
         
     }
+    public static void teste1(){
+        String a,b,soma,sub;
+        a = "0101";
+        b = "100000101";
+        soma = sumB(a,b);
+        System.out.println("><");
+        sub = subB(a,b);
+        System.out.println("><");
+        System.out.println(b2d(a)+"..."+b2d(b));
+        System.out.println(soma+":"+b2d(soma));
+        System.out.println((Integer.parseInt(b2d(a))+Integer.parseInt(b2d(b))));
+        System.out.println(sub+":"+b2d(sub));
+        System.out.println((Integer.parseInt(b2d(a))-Integer.parseInt(b2d(b))));
+    }
+
     public static String b2h(String a){
         char[] parts = "....".toCharArray();
         String[] hexs = "0123456789ABCDEF".split("");
@@ -93,6 +108,12 @@ public class numberis {
         return result;
     }
 
+    public static String subB(String a,String b){
+        if (b.length() < 4) while (b.length() < 4) b = b.toCharArray()[0]+"0"+b.substring(1);
+        String br = (b.toCharArray()[0] == '0') ? '1'+b.substring(1) : '0'+b.substring(1);
+        return sumB(a,br);
+    }
+
     public static String sumB(String a,String b){
         
 
@@ -100,12 +121,18 @@ public class numberis {
         String result = "",value="";
         String cache = "",ls_cache = "";
         sig = a.toCharArray()[0];
+        
         if (a.toCharArray()[0] == b.toCharArray()[0]){
             if (min(a.length(),b.length()) == b.length()){
-                while (a.length() != b.length()&& a.length() != b.length()){
-                    b = "0"+b;
+                while (a.length() != b.length()){
+                    b = b.toCharArray()[0]+"0"+b.substring(1);
                 }
-            }else return sumB(b,a);
+            } else return sumB(b,a);
+            if (!(AmajB_ModBin(a,b))){
+                System.out.println("Alriet"+a+" : "+b);
+                return sumB(b,a);
+            }
+            //System.out.println(a+"|"+b);
             for (int i=a.length()-1;i>=0;i--){
                 value = "0";
                 int soma = 0;
@@ -121,6 +148,13 @@ public class numberis {
         }else{
             char mr = ' ';
             boolean cont = false;
+            if (!(AmajB_ModBin(a,b))){
+                return sumB(b,a);
+            }
+            while (a.length() > b.length()){
+                b = b.toCharArray()[0]+"0"+b.substring(1);
+            }
+            //System.out.println(a+"|"+b);
             for (int i=1;i<=min(a.length(),b.length());i++){
                 cont = false;
                 //System.out.println(a.toCharArray()[a.length()-(i)]+" "+(i));
@@ -181,7 +215,7 @@ public class numberis {
         String result = "";
         int cache = 0,step1=0;
         if (min(a.length(),b.length()) == b.length()){
-            while (a.length() != b.length()&& a.length() != b.length()){
+            while (a.length() != b.length()){
                 b = "0"+b;
             }
         }else return sum(b,a);
@@ -206,6 +240,22 @@ public class numberis {
             word = word + c;
         }
         return word;
+    }
+
+    public static boolean AmajB_ModBin(String a,String b){ // Mínimo em módulo binário
+        String br = b.substring(1),ar = a.substring(1);
+        while (ar.length() > br.length()){
+            br = "0"+br;
+        }
+        while (ar.length() < br.length()){
+            ar = "0"+ar;
+        }
+        //System.out.println(ar.length());
+        for (int i=0;i<ar.length();i++){
+            if (ar.toCharArray()[i] == '1' && br.toCharArray()[i] == '0') return true;
+            if (ar.toCharArray()[i] == '0' && br.toCharArray()[i] == '1') return false;
+        }
+        return true;
     }
 
 }

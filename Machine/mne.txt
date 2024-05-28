@@ -1,19 +1,23 @@
-nop > m1
+nop > save
 -- setting
-mvi a,11h
-mvi b,04h > m2
+mvi a,7e7h
+mvi b,4h
 -- saving
-out 03h > soma
-sta < m1
-mov a,b > qt_times
+out 03h 
+sta < save
+mov a,b 
 out 4h
-lda < m1
+lda < save
 -- CODE
 call < exp_a_b
 hlt
 
 -- exponenciacao
 nop > exp_a_b
+nop > m1
+nop > m2
+nop > soma
+nop > qt_times
 
 sta < m1
 sta < soma
@@ -40,7 +44,6 @@ dcr a
 sta < qt_times
 jnz < loop2
 -- end
-lda < soma
 mov a,b
 mvi b,0h
 

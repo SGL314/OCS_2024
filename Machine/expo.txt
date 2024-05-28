@@ -1,7 +1,7 @@
 nop > m1
 -- setting
-mvi a,2h
-mvi b,1Eh > m2
+mvi a,02h
+mvi b,00h > m2
 -- saving
 out 03h > soma
 sta < m1

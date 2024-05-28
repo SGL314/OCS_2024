@@ -13,12 +13,12 @@ public class cst {
     public static String[] mnemonicsReserved = mnemonics.clone();
     public static ArrayList<String> Memory = new ArrayList<String>();
 
-    public static String A = "0", B = "0", C = "0";
+    public static String A = "00", B = "00", C = "00";
     public static int PC = 0;
     public static int flagSignal;
     public static int flagZero;
     public static long time=0;
-    public static String[] outs = {"0","0","0"};
+    public static String[] outs = {"00","00","00"};
 
     public static boolean stepMnemonic = true,clearTerminal_when_stepInEachMnemonic = false;
 
@@ -40,7 +40,8 @@ public class cst {
         return ret;
     }
     public static String hex(String number){
-        return "";
+        //System.out.println(number+">");
+        return b2h(number);
     }
 
     public static int integer(String number){
@@ -101,15 +102,13 @@ public class cst {
                     if (PC+2<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),Memory.get(PC+2));
                     else if (PC+1<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),"_NONE_");
                     else PC = PC + execute(Memory.get(PC),"_NONE_","_NONE_");
-                    
+
                     if (stepMnemonic){
                         if (clearTerminal_when_stepInEachMnemonic) clearTerminal();
-                        System.out.printf("%s\n%sH %sH %sH \n",mnemonicsReserved[j],hex(A),hex(B),hex(C));
-                        sleep(0.005f);
+                        System.out.printf("%s\n%s %s %s \n",mnemonicsReserved[j],b2d(A),b2d(B),b2d(C));
+                        sleep(0.1f);
                     }
-
                     PC++;
-
                 }
 
                 read.close();
@@ -117,6 +116,7 @@ public class cst {
                 errors(2,"This format of input is not available");
             }
         } catch (Exception e){
+            System.out.println(h2b(Memory.get(PC)));
             if ((e+"").equals("java.lang.NumberFormatException: Sign character in wrong position")){
                 errors(8,"Intern Stack Overflow");
             }else{
@@ -144,14 +144,14 @@ public class cst {
         
         switch (entry){
             case "80": // ADD B
-                A = sum(A,B);
+                A = sumB(A,B);
                 setFlags("A");
                 break;
             case "47": // MOV B,A
                 B = A;
                 break;
             case "81": // ADD C
-                A = sum(A,C);
+                A = sumB(A,C);
                 setFlags("A");
                 break;
             case "41": // MOV B,C
@@ -171,7 +171,9 @@ public class cst {
             // case "E6": // ANI byte
             //     break;
             case "3E": // MVI A,byte
+                //System.out.println(first);
                 A = h2b(first);
+                //System.out.println("hjkhjk");
                 return 1;
             case "CD": // CALL address
                 String address = hex(PC);
@@ -185,19 +187,19 @@ public class cst {
             case "0E": // MVI C,byte
                 C = h2b(first);return 1;
             case "3D": // DCR A
-                A = sum(A,);
+                A = subB(A,"01");
                 setFlags("A");
                 break;
             case "00": // NOP
                 break;
             case "05": // DCR B
-                B = sum(B,);
+                B = subB(B,"01");
                 setFlags("B");
                 break;
             // case "BO": // ORA B
             //     break;
             case "0D": // DCR C
-                C = sum(C,);
+                C = subB(C,"01");
                 setFlags("C");
                 break;
             // case "BI": // ORA C
@@ -214,19 +216,19 @@ public class cst {
                 else if (integer(first) == 4) outs[1] = A;
                 return 1;
             case "3C": // INR A
-                A++;
+                A = sumB(A,"01");
                 setFlags("A");
                 break;
             // case "17": // RAL
             //     break;
             case "04": // INR B
-                B++;
+                B = sumB(B,"01");
                 setFlags("B");
                 break;
             // case "1F": // RAR
             //     break;
             case "OC": // INR C
-                C++;
+                C = sumB(C,"01");
                 setFlags("C");
                 break;
             case "C9": // RET
@@ -240,14 +242,14 @@ public class cst {
             case "C3": // JMP address
                 return -1+(integer(second+first)-PC);
             case "90": // SUB B
-                A -= B;
+                A = subB(A,B);
                 setFlags("A");
                 break;
             case "C2": // JNZ address
                 if (flagZero == 0) return -1+integer(second+first)-PC;
                 return 2;
             case "91": // SUB C
-                A -= C;
+                A = subB(A,C);
                 setFlags("A");
                 break;
             case "CA": // JZ address
@@ -274,7 +276,9 @@ public class cst {
     }
 
     public static void finalizeIt(){
-        System.out.printf("System halted\nA : %sH (%d)\nB : %sH (%d)\nC : %sH (%d)\nOUT 03H : %sH (%d)\nOUT 04H : %sH (%d)\n",hex(A),A,hex(B),B,hex(C),C,hex(outs[0]),outs[0],hex(outs[1]),outs[1]);
+        //System.out.println("---------");
+        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",hex(A),b2d(A),hex(B),b2d(B),hex(C),b2d(C),hex(outs[0]),b2d(outs[0]),hex(outs[1]),b2d(outs[1]));
+        //System.out.println("---------");
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
         System.exit(0);
     }
@@ -285,19 +289,20 @@ public class cst {
                 flagSignal = 1;
                 flagZero = 1;
                 if (b2d(A).toCharArray()[0] != '-') flagSignal = 0;
-                if (b2d(A) != "0") flagZero = 0;
+                if (!(b2d(A).equals("0"))) flagZero = 0;
                 break;
             case "B":
                 flagSignal = 1;
                 flagZero = 1;
                 if (b2d(B).toCharArray()[0] != '-') flagSignal = 0;
-                if (b2d(B) != "0") flagZero = 0;
+                if (!(b2d(B).equals("0"))) flagZero = 0;
                 break;
             case "C":
                 flagSignal = 1;
                 flagZero = 1;
                 if (b2d(C).toCharArray()[0] != '-') flagSignal = 0;
-                if (b2d(C) != "0") flagZero = 0;
+                if (!(b2d(C).equals("0"))) flagZero = 0;
+                //System.out.println(hex(C));
                 break;
         }
     }
@@ -349,12 +354,23 @@ public class cst {
         }
 
     }
+
+
+
+
     // Numberis
+
+
+
+
     public static String b2h(String a){
         char[] parts = "....".toCharArray();
         String[] hexs = "0123456789ABCDEF".split("");
         int j=0;
         String result = "",got="";
+        //while (parts.length < 4) parts = (parts[0]+"0"+toString(parts).substring(1)).toCharArray();
+        //System.out.println(parts.length);
+        //System.out.println("a");
         for (int i=a.length()-1;i>=0;i--){
             parts[3-j] = a.toCharArray()[i];
             if (j==3){
@@ -365,10 +381,12 @@ public class cst {
             }else j++;
         }
         if (j != 0){
-            got = a.substring(1,j+1);
-            int n = Integer.parseInt(b2d("0"+toString(parts)));
+            got = a.substring(0,j);
+            int n = Integer.parseInt(b2d("0"+got));
             result = hexs[n]+result; 
         }
+        
+        //System.out.println(">:"+result);
         return result;
     }
 
@@ -402,6 +420,7 @@ public class cst {
             }
             got = Integer.toString(p,2);
             while (got.length() < 4) got = "0"+got;
+            
             b = got + b;// 
         }
         result = b;
@@ -436,12 +455,115 @@ public class cst {
         }
         return result;
     }
+
+    public static String subB(String a,String b){
+        if (b.length() < 4) while (b.length() < 4) b = b.toCharArray()[0]+"0"+b.substring(1);
+        String br = (b.toCharArray()[0] == '0') ? '1'+b.substring(1) : '0'+b.substring(1);
+        return sumB(a,br);
+    }
+
+    public static String sumB(String a,String b){
+        
+
+        char sig=' ';
+        String result = "",value="";
+        String cache = "",ls_cache = "";
+        sig = a.toCharArray()[0];
+        
+        if (a.toCharArray()[0] == b.toCharArray()[0]){
+            if (min(a.length(),b.length()) == b.length()){
+                while (a.length() != b.length()){
+                    b = b.toCharArray()[0]+"0"+b.substring(1);
+                }
+            } else return sumB(b,a);
+            if (!(AmajB_ModBin(a,b))){
+                //System.out.println("Alriet"+a+" : "+b);
+                return sumB(b,a);
+            }
+            //System.out.println(a+"|"+b);
+            for (int i=a.length()-1;i>=0;i--){
+                value = "0";
+                int soma = 0;
+                soma += (a.toCharArray()[i] == '1') ? 1 : 0;
+                soma += (b.toCharArray()[i] == '1') ? 1 : 0;
+                soma += (cache == "1") ? 1 : 0;
+                ls_cache = cache;
+                cache = "0";
+                if (soma == 1 || soma == 3) value = "1";
+                if (soma >= 2) cache = "1";
+                result = value+result;
+            }
+        }else{
+            char mr = ' ';
+            boolean cont = false;
+            if (!(AmajB_ModBin(a,b))){
+                return sumB(b,a);
+            }
+            while (a.length() > b.length()){
+                b = b.toCharArray()[0]+"0"+b.substring(1);
+            }
+            //System.out.println(a+"|"+b);
+            for (int i=1;i<=min(a.length(),b.length());i++){
+                cont = false;
+                //System.out.println(a.toCharArray()[a.length()-(i)]+" "+(i));
+                if (a.toCharArray()[a.length()-i] == '1'){
+                    if (b.toCharArray()[b.length()-i] == '1') mr = '0';
+                    else mr = '1';
+                }else{
+                    if (b.toCharArray()[b.length()-i] == '0') mr = '0';
+                    else{
+                        int k = 1;
+                        while (a.length()-(i+k)>=0){
+                            //System.out.println(a.toCharArray()[a.length()-(i+k)]+" "+(i));
+                            char[] ar = a.toCharArray(),br = b.toCharArray();
+                            ar[a.length()-(i+k-1)] = '1';
+                            if (a.toCharArray()[a.length()-(i+k)] == '1'){
+                                
+                                br[b.length()-i] = '0';
+                                ar[a.length()-(i+k)] = '0';
+                                //ar[a.length()-(i)] = '1';
+                                b = toString(br);
+                                a = toString(ar);
+                                i--;
+                                cont = true;
+                                //System.out.println(i);
+                                break;
+                            }
+                            a = toString(ar);
+                            k++;
+                        }
+                    }
+                }
+                if (cont) continue;
+                result = mr + result;
+                //System.out.println(result);
+            }
+        }
+        if (ls_cache == "1") return sumB(a.toCharArray()[0] +"000"+ a,b.toCharArray()[0] +"000"+ b);
+        result = sig + result.substring(1);
+        return result;
+    }
+    
+
+    public static String dou(String a){
+        String result = "";
+        int cache = 0,step1=0;
+        for (int i=a.length()-1;i>=0;i--){
+            step1 = Integer.parseInt(""+a.toCharArray()[i])*2+cache;
+            cache = 0;
+            if (step1 >= 10){
+                cache = (step1-step1%10)/10;
+            }
+            result = ""+step1%10 +result;
+        }
+        return result;
+    }
     
     public static String sum(String a,String b){
         String result = "";
         int cache = 0,step1=0;
         if (min(a.length(),b.length()) == b.length()){
-            while (a.length() != b.length()&& a.length() != b.length()){
+            while (a.length() != b.length()){
                 b = "0"+b;
             }
         }else return sum(b,a);
@@ -466,6 +588,22 @@ public class cst {
             word = word + c;
         }
         return word;
+    }
+
+    public static boolean AmajB_ModBin(String a,String b){ // Mínimo em módulo binário
+        String br = b.substring(1),ar = a.substring(1);
+        while (ar.length() > br.length()){
+            br = "0"+br;
+        }
+        while (ar.length() < br.length()){
+            ar = "0"+ar;
+        }
+        //System.out.println(ar.length());
+        for (int i=0;i<ar.length();i++){
+            if (ar.toCharArray()[i] == '1' && br.toCharArray()[i] == '0') return true;
+            if (ar.toCharArray()[i] == '0' && br.toCharArray()[i] == '1') return false;
+        }
+        return true;
     }
 
 }
