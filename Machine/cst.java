@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.lang.Thread;
+import java.io.FileWriter;
 
 // CPU of the SAP 2 _ cst
 public class cst {
@@ -22,7 +23,7 @@ public class cst {
 
     public static boolean stepMnemonic=true,clearTerminal_when_stepInEachMnemonic=false,delay_when_showAnd_useOutput=false,show_when_useOutput=false,showAllOutputs_when_useOutput=false;
 
-    // errors 9
+    // errors 11
 
     public static void errors(int error,String saida){
         System.out.printf("\nCST ERROR %03d : %s\n",error,saida);
@@ -54,6 +55,7 @@ public class cst {
         System.out.println("\n__CST__");
         time = System.currentTimeMillis();
         setConfigurations();
+        ArrayList<String> codingLines = new ArrayList<String>();
         // Preset
         for (int i=0;i<mnemonics.length;i++){
             mnemonics[i] = mnemonics[i].replace(" ","");
@@ -72,11 +74,10 @@ public class cst {
                 }
                 System.out.println("Take from : "+args[0]);
 
-                ArrayList<String> codingLines = new ArrayList<String>();
-
                 while (read.hasNextLine()){
                     codingLines.add(read.nextLine());
                 }
+                read.close();
                 for (int i=0;i<integer("FFFF");i++){
                     Memory.add("00");
                 }
@@ -110,15 +111,15 @@ public class cst {
                     }
                     if (show_when_useOutput && mnemonicsReserved[j].equals("OUT byte")){
                         if (showAllOutputs_when_useOutput){
-                            System.out.println("OUT 3H : "+hex(outs[0])+"H ("+b2d(A)+")");
-                            System.out.println("OUT 4H : "+hex(outs[1])+"H ("+b2d(A)+")");
+                            System.out.println("OUT 3H : "+hex(outs[0])+"H ("+b2d(outs[0])+")");
+                            System.out.println("OUT 4H : "+hex(outs[1])+"H ("+b2d(outs[1])+")");
                         }else System.out.println("OUT "+Memory.get(PC)+"H : "+hex(A)+"H ("+b2d(A)+")");
                         if (delay_when_showAnd_useOutput) sleep(1);
                     }
                     PC++;
                 }
 
-                read.close();
+                
             }else{
                 errors(2,"This format of input is not available");
             }
@@ -253,8 +254,51 @@ public class cst {
                 A = r;
                 setFlags("A");
                 return 1;
-            // case "DB": // IN byte
-            //     break;
+            case "DB": // IN byte
+                //System.out.print(":>'");
+                File stream1;
+                Scanner readKeyboard = null;
+
+                boolean is_hex = false;
+                String input = ""; 
+                while (true){
+                    try {
+                        stream1 = new File("Input.txt");
+                        readKeyboard = new Scanner(stream1);
+                    } catch (Exception e){
+                        errors(10,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
+                    }
+                    if (!(readKeyboard.hasNext())) continue;
+                    input = readKeyboard.next();
+                    System.out.println(input.length());
+                    
+
+                    input = input.toUpperCase();
+                    System.out.println(input+"'<:");
+                    for (int i=0;i<input.length();i++) if (input.toCharArray()[i]=='H') is_hex=true;
+                    //System.out.println(is_hex);
+                    if (is_hex){
+                        String number = "";
+                        for (int i=0;i<input.length();i++){
+                            if (input.toCharArray()[i]=='H') break;
+                            number = number + input.toCharArray()[i];
+                        }
+                        A=h2b(number);
+                    }
+                    else A = d2b(input);
+                    break;
+                }
+                
+                FileWriter stream2=null;
+                try {
+                    stream2 = new FileWriter("Input.txt");
+                    stream2.write(" ");
+                }catch (Exception e){
+                    errors(11,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
+                }
+                
+                //System.out.println("end");
+                return 1;
             case "D3": // OUT byte
                 if (integer(first) == 3) outs[0] = A;
                 else if (integer(first) == 4) outs[1] = A;
@@ -502,6 +546,15 @@ public class cst {
         }
         result = b;
         return result;
+    }
+
+    public static String d2b(String a){
+        String value = "00";
+        String add = "01";
+        char[] al = a.toCharArray();
+        if (al[0]=='-') add = "11";
+        while (!(b2d(value).equals(a))) value = sumB(value,add);
+        return value;
     }
 
     public static String mult(String a,String b){

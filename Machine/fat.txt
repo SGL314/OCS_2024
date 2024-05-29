@@ -1,0 +1,34 @@
+in 1h
+-- setting
+mov c,a
+mvi a,03h
+mvi b,7h
+hlt
+-- machine
+call < mult_a_b
+hlt
+
+nop > mult_a_b
+nop > m1
+nop > m2
+
+mov c,a
+sta < m1
+mov a,b
+sta < m2
+mvi a,0h
+inr b
+dcr b
+jz < end
+add c > ak
+dcr b
+jnz < ak
+nop > end
+-- show
+mov b,c
+sta < m1
+lda < m2
+mov c,a
+lda < m1
+
+ret

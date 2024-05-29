@@ -1,10 +1,11 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
 public class numberis {
     public static void main (String[] args){
         String a,b,soma,sub;
-        a = "0000";
-        b = "01";
-        System.out.println(b2h(a));
-        
+        a = "-10";
+
     }
     public static void teste1(){
         String a,b,soma,sub;
@@ -79,6 +80,15 @@ public class numberis {
         return result;
     }
 
+    public static String d2b(String a){
+        String value = "00";
+        String add = "01";
+        char[] al = a.toCharArray();
+        if (al[0]=='-') add = "11";
+        while (!(b2d(value).equals(a))) value = sumB(value,add);
+        return value;
+    }
+
     public static String mult(String a,String b){
         String result = "",step2= "";
         String cacheZeros = "", cacheZerosA = "";
@@ -129,7 +139,7 @@ public class numberis {
                 }
             } else return sumB(b,a);
             if (!(AmajB_ModBin(a,b))){
-                System.out.println("Alriet"+a+" : "+b);
+                //System.out.println("Alriet"+a+" : "+b);
                 return sumB(b,a);
             }
             //System.out.println(a+"|"+b);
