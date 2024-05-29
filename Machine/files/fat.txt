@@ -1,17 +1,16 @@
 in 0h
 mov c,a
-in 1h
+dcr a
 mov b,a
 mov a,c
 -- prepare
+nop > fat
 call < mult_a_b
+dcr c
+jnz < eng1
 hlt
 
 nop > mult_a_b
--- memory
-nop > a
-nop > b
-nop > r
 
 sta < a
 mov a,b
@@ -38,3 +37,13 @@ mov c,a
 lda <r
 
 ret
+
+nop > eng1
+mov b,c
+jnz < fat
+
+
+-- memory
+nop > a
+nop > b
+nop > r

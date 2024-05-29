@@ -270,11 +270,11 @@ public class cst {
                     }
                     if (!(readKeyboard.hasNext())) continue;
                     input = readKeyboard.next();
-                    System.out.println(input.length());
+                    //System.out.println(input.length());
                     
 
                     input = input.toUpperCase();
-                    System.out.println(input+"'<:");
+                    //System.out.println(input+"'<:");
                     for (int i=0;i<input.length();i++) if (input.toCharArray()[i]=='H') is_hex=true;
                     //System.out.println(is_hex);
                     if (is_hex){
@@ -288,16 +288,33 @@ public class cst {
                     else A = d2b(input);
                     break;
                 }
-                
+                readKeyboard.close();
                 FileWriter stream2=null;
                 try {
                     stream2 = new FileWriter("Input.txt");
-                    stream2.write(" ");
+                    stream2.write("");
+                    stream2.close();
+                    //stream1 = new File("Input.txt");
+                    
+                    //readKeyboard = new Scanner(stream1);
                 }catch (Exception e){
                     errors(11,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
                 }
-                
+                //System.out.println("Clear");
+                //sleep(5);
                 //System.out.println("end");
+                try {
+                    FileWriter file = new FileWriter("Input.txt");
+                    file.write("");
+                    file.flush();
+                    file.write("");
+                    file.close();
+                    //System.out.println("...");
+
+                    //file.close();
+                }catch (Exception e){
+        
+                }
                 return 1;
             case "D3": // OUT byte
                 if (integer(first) == 3) outs[0] = A;
@@ -322,7 +339,7 @@ public class cst {
                 a=a.toCharArray()[a.length()-1]+a.substring(0,a.length()-1);
                 A=a;
                 break;
-            case "OC": // INR C
+            case "0C": // INR C
                 C = sumB(C,"01");
                 setFlags("C");
                 break;
@@ -390,6 +407,17 @@ public class cst {
 
     public static void finalizeIt(){
         //System.out.println("---------");
+        try {
+            FileWriter file = new FileWriter("Input.txt");
+            file.write("");
+            file.write("");
+            file.close();
+            File close = new File("Input.txt");
+
+            //file.close();
+        }catch (Exception e){
+
+        }
         System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",hex(A),b2d(A),hex(B),b2d(B),hex(C),b2d(C),hex(outs[0]),b2d(outs[0]),hex(outs[1]),b2d(outs[1]));
         //System.out.println("---------");
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
@@ -415,7 +443,7 @@ public class cst {
                 flagZero = 1;
                 if (b2d(C).toCharArray()[0] != '-') flagSignal = 0;
                 if (!(b2d(C).equals("0"))) flagZero = 0;
-                System.out.println(flagSignal);
+                //System.out.println(flagSignal);
                 break;
         }
     }
@@ -549,11 +577,25 @@ public class cst {
     }
 
     public static String d2b(String a){
-        String value = "00";
+        String value = "00";char sig = ' ';
         String add = "01";
         char[] al = a.toCharArray();
-        if (al[0]=='-') add = "11";
-        while (!(b2d(value).equals(a))) value = sumB(value,add);
+        String new_al = "";
+        boolean read = false;
+        if (al[0]=='-'){
+            add = "11";
+            al[0] = '0';
+            sig = '-';
+        }
+        for (char c : al){
+            if (c == '0' && !(read)) continue;
+            read = true;
+            new_al = new_al + c;
+        }
+        if (read) al = new_al.toCharArray();
+        //System.out.println(toString(al));
+        if (add.equals("11")) while (!(b2d(value).equals(sig+toString(al)))) value = sumB(value,add);
+        else while (!(b2d(value).equals(toString(al)))) value = sumB(value,add);
         return value;
     }
 

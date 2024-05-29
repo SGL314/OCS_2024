@@ -1,0 +1,81 @@
+mvi a,2h
+sta < casas
+--
+mvi a,9h ;in 0h 
+mov c,a
+mvi a,2h ;in 1h 
+mov b,a
+out 4h
+mov a,c
+out 3h
+-------
+nop > greater
+sta < a
+mov a,b
+sta < b
+lda < a
+-- eng1
+dcr a > eng1
+jz < gr_b
+dcr b
+jz < gr_a
+jmp < eng1
+
+-- results
+
+nop > gr_A
+lda < b
+mov b,a
+lda < a
+mvi c,0h
+jmp < gt_eng2
+
+nop > gr_B
+lda < a
+mov b,a
+lda < b
+mvi c,0h
+jmp < gt_eng2
+
+-- ajuste 
+nop  > gt_eng2
+sta < a
+mov a,b
+sta < b
+lda < a
+mvi c,0h
+-- eng2
+
+inr c > eng2
+sub b 
+jz < multiplo
+jm < non_multiplo
+jmp < eng2
+-- end
+mov a,c
+mvi b,0h
+mvi c,0h
+hlt > tot_end
+
+-- results 
+nop > multiplo
+lda < b
+mov b,a
+lda < a
+jmp < tot_end
+
+nop > non_multiplo
+lda < b
+mov b,a
+lda < a
+dcr c
+jmp < tot_end
+
+
+-- memory
+nop >a
+nop >b
+nop >c
+nop > casas
+nop > tr
+nop > mem

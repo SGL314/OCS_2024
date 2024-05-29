@@ -103,7 +103,6 @@ public class ast{
                 char[] chars;
                 boolean getNewPointer = true;
 
-
                 if (args.length == 3){ 
                     init = Integer.decode("0x"+args[2]);
                 }else if (args.length == 2){
@@ -134,6 +133,7 @@ public class ast{
 
                 for (int i=0;i<mnemonicsLines.size();i++){
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
+                    chars = removeCommentary(chars);
                     if (isNotCommentary(chars)){
                         position = getPositionMnemonic(chars);
                         if (hasAddressSetting(chars)){
@@ -173,7 +173,9 @@ public class ast{
                 }
 
                 for (int i=0;i<mnemonicsLines.size();i++){
+                    mnemonicsLines.set(i,toString(removeCommentary(mnemonicsLines.get(i).toCharArray())));
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
+                    chars = removeCommentary(chars);
                     if (isNotCommentary(chars)){
                         position = getPositionMnemonic(chars);
                         Config.addCoding_byConfig(position,i);
@@ -273,6 +275,16 @@ public class ast{
         
         errors(5, "Line not identified : '"+toString(chars)+"'");
         return true;
+    }
+
+    public static char[] removeCommentary(char[] chars){
+        String res = "";
+        for (int i =0;i<chars.length;i++){
+            if (chars[i] == ';') break;
+            res = res + chars[i];
+        }
+        //System.out.println(res);
+        return res.toCharArray();
     }
 
     public static boolean hasTwoArguments(int position){
