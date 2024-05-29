@@ -20,9 +20,9 @@ public class cst {
     public static long time=0;
     public static String[] outs = {"00","00","00"};
 
-    public static boolean stepMnemonic = true,clearTerminal_when_stepInEachMnemonic = false;
+    public static boolean stepMnemonic=true,clearTerminal_when_stepInEachMnemonic=false,delay_when_showAnd_useOutput=false,show_when_useOutput=false,showAllOutputs_when_useOutput=false;
 
-    // errors 8
+    // errors 9
 
     public static void errors(int error,String saida){
         System.out.printf("\nCST ERROR %03d : %s\n",error,saida);
@@ -34,11 +34,13 @@ public class cst {
         if (ret.length()==1) return "0"+ret;
         return ret;
     }
+
     public static String hex(long number){
         String ret = Integer.toString((int) number,16).toUpperCase();
         if (ret.length()==1) return "0"+ret;
         return ret;
     }
+    
     public static String hex(String number){
         //System.out.println(number+">");
         return b2h(number);
@@ -61,7 +63,6 @@ public class cst {
             if (args[0].substring(args[0].length()-4).equals(".txt")){
                 File from  = new File(args[0]);
                 Scanner read = null;
-
                 int init=0;
 
                 try {
@@ -69,10 +70,9 @@ public class cst {
                 } catch (Exception e){
                     errors(3,"Can't open "+args[0]+"\nCheck if this file exists and has the extension '.txt'");
                 }
+                System.out.println("Take from : "+args[0]);
 
                 ArrayList<String> codingLines = new ArrayList<String>();
-
-                System.out.println("Take from : "+args[0]);
 
                 while (read.hasNextLine()){
                     codingLines.add(read.nextLine());
@@ -108,6 +108,13 @@ public class cst {
                         System.out.printf("%s\n%s %s %s \n",mnemonicsReserved[j],b2d(A),b2d(B),b2d(C));
                         sleep(0.1f);
                     }
+                    if (show_when_useOutput && mnemonicsReserved[j].equals("OUT byte")){
+                        if (showAllOutputs_when_useOutput){
+                            System.out.println("OUT 3H : "+hex(outs[0])+"H ("+b2d(A)+")");
+                            System.out.println("OUT 4H : "+hex(outs[1])+"H ("+b2d(A)+")");
+                        }else System.out.println("OUT "+Memory.get(PC)+"H : "+hex(A)+"H ("+b2d(A)+")");
+                        if (delay_when_showAnd_useOutput) sleep(1);
+                    }
                     PC++;
                 }
 
@@ -124,7 +131,7 @@ public class cst {
                 return;
             }
         }
-        System.out.printf("Read all of the memory\nA : %sH (%d)\nB : %sH (%d)\nC : %sH (%d)\nOUT 03H : %sH (%d)\nOUT 04H : %sH (%d)\n",hex(A),A,hex(B),B,hex(C),C,hex(outs[0]),outs[0],hex(outs[1]),outs[1]);
+        System.out.printf("Read all of the memory\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",hex(A),b2d(A),hex(B),b2d(B),hex(C),b2d(C),hex(outs[0]),b2d(outs[0]),hex(outs[1]),b2d(outs[1]));
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
     }
     // Ececution
@@ -141,7 +148,7 @@ public class cst {
     }
 
     public static int execute(String entry, String first, String second){
-        
+        String a,b,c,r;
         switch (entry){
             case "80": // ADD B
                 A = sumB(A,B);
@@ -157,23 +164,38 @@ public class cst {
             case "41": // MOV B,C
                 B = C;
                 break;
-            // case "A0": // ANA B
-            //     break;
+            case "A0": // ANA B
+                b=B;a=A;r="";
+                while (a.length()<b.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>b.length())b=b.toCharArray()[0]+"0"+b.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]=='1'&&b.toCharArray()[i]=='1')?"1":"0";
+                A = r;
+                setFlags("A");
+                break;
             case "4F": // MOV C,A
                 C = A;
                 break;
-            // case "A1": // ANA C
-            //     setFlags("A");
-            //     break;
+            case "A1": // ANA C
+                c=C;a=A;r="";
+                while (a.length()<c.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>c.length())c=c.toCharArray()[0]+"0"+c.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]=='1'&&c.toCharArray()[i]=='1')?"1":"0";
+                A = r;
+                setFlags("A");
+                break;
             case "48": // MOV C,B
                 C = B;
                 break;
-            // case "E6": // ANI byte
-            //     break;
+            case "E6": // ANI byte
+                c=h2b(first);a=A;r="";
+                while (a.length()<c.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>c.length())c=c.toCharArray()[0]+"0"+c.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]=='1'&&c.toCharArray()[i]=='1')?"1":"0";
+                A = r;
+                setFlags("A");
+                return 1;
             case "3E": // MVI A,byte
-                //System.out.println(first);
                 A = h2b(first);
-                //System.out.println("hjkhjk");
                 return 1;
             case "CD": // CALL address
                 String address = hex(PC);
@@ -182,8 +204,12 @@ public class cst {
                 return -1+integer(second+first)-PC;
             case "06": // MVI B,byte
                 B = h2b(first);return 1;
-            // case "2F": // CMA
-            //     break;
+            case "2F": // CMA
+                a=A;
+                if (a.toCharArray()[0]=='1')a='0'+a.substring(1);
+                else a='1'+a.substring(1);
+                A=a;
+                break;
             case "0E": // MVI C,byte
                 C = h2b(first);return 1;
             case "3D": // DCR A
@@ -196,37 +222,62 @@ public class cst {
                 B = subB(B,"01");
                 setFlags("B");
                 break;
-            // case "BO": // ORA B
-            //     break;
+            case "B0": // ORA B
+                a=A;b=B;r="";
+                while (a.length()<b.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>b.length())b=b.toCharArray()[0]+"0"+b.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]=='1'||b.toCharArray()[i]=='1')?"1":"0";
+                A = r;
+                setFlags("A");
+                break;
             case "0D": // DCR C
                 C = subB(C,"01");
                 setFlags("C");
                 break;
-            // case "BI": // ORA C
-            //     break;
+            case "BI": // ORA C
+                c=C;a=A;r="";
+                while (a.length()<c.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>c.length())c=c.toCharArray()[0]+"0"+c.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]=='1'||c.toCharArray()[i]=='1')?"1":"0";
+                A = r;
+                setFlags("A");
+                break;
             case "76": // HLT
                 finalizeIt();
                 break;
-            // case "F6": // ORI byte
-            //     break;
+            case "F6": // ORI byte
+                c=h2b(first);a=A;r="";
+                while (a.length()<c.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>c.length())c=c.toCharArray()[0]+"0"+c.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]=='1'||c.toCharArray()[i]=='1')?"1":"0";
+                A = r;
+                setFlags("A");
+                return 1;
             // case "DB": // IN byte
             //     break;
             case "D3": // OUT byte
                 if (integer(first) == 3) outs[0] = A;
                 else if (integer(first) == 4) outs[1] = A;
+                else errors(9,"Can't use the port "+hex(first));
                 return 1;
             case "3C": // INR A
                 A = sumB(A,"01");
                 setFlags("A");
                 break;
-            // case "17": // RAL
-            //     break;
+            case "17": // RAL
+                a=A;
+                a=a.substring(1)+a.toCharArray()[0];
+                A=a;
+                break;
             case "04": // INR B
                 B = sumB(B,"01");
                 setFlags("B");
                 break;
-            // case "1F": // RAR
-            //     break;
+            case "1F": // RAR
+                a=A;
+                a=a.toCharArray()[a.length()-1]+a.substring(0,a.length()-1);
+                A=a;
+                break;
             case "OC": // INR C
                 C = sumB(C,"01");
                 setFlags("C");
@@ -255,17 +306,35 @@ public class cst {
             case "CA": // JZ address
                 if (flagZero == 1) return -1+(integer(second+first)-PC);
                 return 2;
-            // case "A8": // XRA B
-            //     break;
+            case "A8": // XRA B
+                b=h2b(first);a=A;r="";
+                while (a.length()<b.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>b.length())b=b.toCharArray()[0]+"0"+b.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]!=b.toCharArray()[i])?"1":"0";
+                A = r;
+                setFlags("A");
+                break;
             case "3A": // LDA address
                 A = h2b(Memory.get(integer(second+first)));return 2;
-            // case "A9": // XRA C
-            //     break;
+            case "A9": // XRA C
+                c=h2b(first);a=A;r="";
+                while (a.length()<c.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>c.length())c=c.toCharArray()[0]+"0"+c.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]!=c.toCharArray()[i])?"1":"0";
+                A = r;
+                setFlags("A");
+                break;
             case "78": // MOV A,B
                 A = B;
                 break;
-            // case "EE": // XRI byte
-            //     break;
+            case "EE": // XRI byte
+                c=h2b(first);a=A;r="";
+                while (a.length()<c.length())a=a.toCharArray()[0]+"0"+a.substring(1);
+                while (a.length()>c.length())c=c.toCharArray()[0]+"0"+c.substring(1);
+                for (int i=0;i<a.length();i++)r+=(a.toCharArray()[i]!=c.toCharArray()[i])?"1":"0";
+                A = r;
+                setFlags("A");
+                return 1;
             case "79": // MOV A,C
                 A = C;
                 break;
@@ -302,7 +371,7 @@ public class cst {
                 flagZero = 1;
                 if (b2d(C).toCharArray()[0] != '-') flagSignal = 0;
                 if (!(b2d(C).equals("0"))) flagZero = 0;
-                //System.out.println(hex(C));
+                System.out.println(flagSignal);
                 break;
         }
     }
@@ -347,12 +416,21 @@ public class cst {
                 case "clearTerminal_when_stepInEachMnemonic":
                     clearTerminal_when_stepInEachMnemonic = value;
                     break;
+                case "delay_when_showAnd_useOutput":
+                    delay_when_showAnd_useOutput = value;
+                    break;
+                case "show_when_useOutput":
+                    show_when_useOutput = value;
+                    break;
+                case "showAllOutputs_when_useOutput":
+                    showAllOutputs_when_useOutput = value;
+                    break;
                 default:
                     errors(7,"Occured a problem when reading a configuration (configuration): '"+line+"'");
 
             }
         }
-
+        read.close();
     }
 
 
@@ -410,7 +488,6 @@ public class cst {
     public static String h2b(String a){
         String b = "";
         String[] hexs = "0123456789ABCDEF".split("");
-        int j=0;
         String result = "",got="";
         for (int i=a.length()-1;i>=0;i--){
             int p=0;
