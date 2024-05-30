@@ -7,18 +7,19 @@ import java.util.Scanner;
 // Assembler asd CPU of the SAP 2 _ ast
 public class acst{
 
-    // errors 5
+    // Errors 8
     public static void errors(int error,String saida){
         System.out.printf("\nACST ERROR %03d : %s\n",error,saida);
         System.exit(-1);
     }
     public static boolean[] onPresets = {true,true,true};
     public static void main(String[] args) {
-        setConfigurations();
-        ProcessBuilder processBuilder = new ProcessBuilder();
+        System.out.println("\n__ACST__");
         String[] presets = "javac acst.java;javac ast.java;javac cst.java".split(";");
+        ProcessBuilder processBuilder = new ProcessBuilder();
         String exec_ast = "java ast ";
         String exec_cst = "java cst ";
+        setConfigurations();
         
         switch (args.length){
             case 2:
@@ -35,35 +36,49 @@ public class acst{
 
         try {
             // Preset
-            Process process;
             BufferedReader reader;
+            Process process;
             String line;
-            int i=-1;
-            for (String preset : presets){
-                i++;
-                if (!(onPresets[i])) continue;
-                System.out.println("Executing : "+preset);
-                processBuilder.command("cmd.exe","/c",preset);
-                process = processBuilder.start();
-                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                while ((line = reader.readLine()) != null) System.out.println(line);
+            int i = -1;
+
+            try {
+                for (String preset : presets){
+                    i++;
+                    if (!(onPresets[i])) continue;
+                    System.out.println("Executing : "+preset);
+                    processBuilder.command("cmd.exe","/c",preset);
+                    process = processBuilder.start();
+                    reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                    while ((line = reader.readLine()) != null) System.out.println(line);
+                }
+            } catch (Exception e){
+                errors(6,"Error in Preset");
             }
 
             // AST
-            processBuilder.command("cmd.exe","/c",exec_ast);
-            process = processBuilder.start();
-            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            while ((line = reader.readLine()) != null) System.out.println(line);
+            try {
+                processBuilder.command("cmd.exe","/c",exec_ast);
+                process = processBuilder.start();
+                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                while ((line = reader.readLine()) != null) System.out.println(line);
+            } catch (Exception e){
+                errors(7,"Error in AST");
+            }
             
             // CST
-            processBuilder.command("cmd.exe","/c",exec_cst);
-            process = processBuilder.start();
-            reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            while ((line = reader.readLine()) != null) System.out.println(line);
+            try {
+                processBuilder.command("cmd.exe","/c",exec_cst);
+                process = processBuilder.start();
+                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                while ((line = reader.readLine()) != null) System.out.println(line);
+            } catch (Exception e){
+                errors(8,"Error in CST");
+            }
 
 
         } catch (Exception e){
-
+            System.out.println("Something went wrong, call the developer\n__ERROR not defined__\n\n"+e);
+            return;
         }
     }
 
@@ -79,6 +94,7 @@ public class acst{
         while (read.hasNextLine()){
             lines.add(read.nextLine());
         }
+        read.close();
         
         for (String line : lines){
             if (!(line.split(" ")[0].equals("ACST"))) continue;

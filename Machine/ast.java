@@ -9,14 +9,14 @@ import java.util.ArrayList;
 public class ast{
     public static String[] mnemonics = {"ADD B","MOV B,A","ADD C","MOV B,C","ANA B","MOV C,A","ANA C","MOV C,B","ANI byte","MVI A,byte","CALL address","MVI B,byte","CMA","MVI C,byte","DCR A","NOP","DCR B","ORA B","DCR C","ORA C","HLT","ORI byte","IN byte","OUT byte","INR A","RAL","INR B","RAR","INR C","RET","JM address","STA address","JMP address","SUB B","JNZ address","SUB C","JZ address","XRA B","LDA address","XRA C","MOV A,B","XRI byte","MOV A,C"};
     public static String[] codes = {"80","47","81","41","A0","4F","A1","48","E6","3E","CD","06","2F","0E","3D","00","05","B0","0D","BI","76","F6","DB","D3","3C","17","04","1F","0C","C9","FA","32","C3","90","C2","91","CA","A8","3A","A9","78","EE","79"};
-    public static String[] mnemonicsReserved = mnemonics.clone();
-    public static ArrayList<Pointer> pointers = new ArrayList<Pointer>();
     public static ArrayList<String> mnemonicsLines = new ArrayList<String>();
     public static ArrayList<String> codingLines = new ArrayList<String>();
-    public static long time=0;
+    public static ArrayList<Pointer> pointers = new ArrayList<Pointer>();
+    public static String[] mnemonicsReserved = mnemonics.clone();
     public static int differencePositionMemory = 0;
+    public static long time=0;
 
-    // Errors identified 13
+    // Errors 13
 
     public static class Pointer{
         int address;
@@ -98,10 +98,11 @@ public class ast{
 
         try {
             if (args[0].substring(args[0].length()-4).equals(".txt")){
-                File from = new File(args[0]);FileWriter to;
                 int init=0,positionMemory,position;
-                char[] chars;
+                File from = new File(args[0]);
                 boolean getNewPointer = true;
+                FileWriter to;
+                char[] chars;
 
                 if (args.length == 3){ 
                     init = Integer.decode("0x"+args[2]);
@@ -130,6 +131,7 @@ public class ast{
                 while (read.hasNextLine()){
                     mnemonicsLines.add(read.nextLine());
                 }
+                read.close();
 
                 for (int i=0;i<mnemonicsLines.size();i++){
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
@@ -166,12 +168,6 @@ public class ast{
                 codingLines = new ArrayList<String>();
 
                 // Reading
-                try {
-                    read = new Scanner(from);
-                } catch (Exception e){
-                    errors(8,"Can't open "+args[0]+"(Reading)\nCheck if this file exists and has the extension '.txt'");
-                }
-
                 for (int i=0;i<mnemonicsLines.size();i++){
                     mnemonicsLines.set(i,toString(removeCommentary(mnemonicsLines.get(i).toCharArray())));
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
@@ -195,9 +191,7 @@ public class ast{
                     }
                 }
 
-                read.close();
-
-                if (args.length == 3){ // orign destiny position
+                if (args.length == 3){ // format : orign destiny position
                     to = new FileWriter(args[1]);
                     init = Integer.decode("0x"+args[2]);
                     int i = 0;
@@ -207,7 +201,7 @@ public class ast{
                     }
                     System.out.println("Put in : "+args[1]);
                     to.close();
-                }else if (args.length == 2){
+                }else if (args.length == 2){ // format : orgign/destiny position
                     init = Integer.decode("0x"+args[1]);
                     to = new FileWriter(args[0]);
                     int i = 0;
@@ -283,7 +277,6 @@ public class ast{
             if (chars[i] == ';') break;
             res = res + chars[i];
         }
-        //System.out.println(res);
         return res.toCharArray();
     }
 
@@ -470,6 +463,7 @@ public class ast{
         while (read.hasNextLine()){
             lines.add(read.nextLine());
         }
+        read.close();
         
         for (String line : lines){
             if (!(line.split(" ")[0].equals("AST"))) continue;

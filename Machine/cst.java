@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.lang.Thread;
@@ -11,19 +8,14 @@ import java.io.FileWriter;
 public class cst {
     public static String[] mnemonics = {"ADD B","MOV B,A","ADD C","MOV B,C","ANA B","MOV C,A","ANA C","MOV C,B","ANI byte","MVI A,byte","CALL address","MVI B,byte","CMA","MVI C,byte","DCR A","NOP","DCR B","ORA B","DCR C","ORA C","HLT","ORI byte","IN byte","OUT byte","INR A","RAL","INR B","RAR","INR C","RET","JM address","STA address","JMP address","SUB B","JNZ address","SUB C","JZ address","XRA B","LDA address","XRA C","MOV A,B","XRI byte","MOV A,C"};
     public static String[] codes = {"80","47","81","41","A0","4F","A1","48","E6","3E","CD","06","2F","0E","3D","00","05","B0","0D","BI","76","F6","DB","D3","3C","17","04","1F","0C","C9","FA","32","C3","90","C2","91","CA","A8","3A","A9","78","EE","79"};
-    public static String[] mnemonicsReserved = mnemonics.clone();
-    public static ArrayList<String> Memory = new ArrayList<String>();
-
-    public static String A = "00", B = "00", C = "00";
-    public static int PC = 0;
-    public static int flagSignal;
-    public static int flagZero;
-    public static long time=0;
-    public static String[] outs = {"00","00","00"};
-
     public static boolean stepMnemonic=true,clearTerminal_when_stepInEachMnemonic=false,delay_when_showAnd_useOutput=false,show_when_useOutput=false,showAllOutputs_when_useOutput=false;
+    public static String[] outs = {"00","00","00"},mnemonicsReserved = mnemonics.clone();
+    public static ArrayList<String> Memory = new ArrayList<String>();
+    public static String A = "00", B = "00", C = "00";
+    public static int PC = 0,flagSignal,flagZero;
+    public static long time=0;
 
-    // errors 11
+    // Errors 13
 
     public static void errors(int error,String saida){
         System.out.printf("\nCST ERROR %03d : %s\n",error,saida);
@@ -35,18 +27,7 @@ public class cst {
         if (ret.length()==1) return "0"+ret;
         return ret;
     }
-
-    public static String hex(long number){
-        String ret = Integer.toString((int) number,16).toUpperCase();
-        if (ret.length()==1) return "0"+ret;
-        return ret;
-    }
-    
-    public static String hex(String number){
-        //System.out.println(number+">");
-        return b2h(number);
-    }
-
+  
     public static int integer(String number){
         return Integer.decode("0x"+number);
     }
@@ -55,17 +36,18 @@ public class cst {
         System.out.println("\n__CST__");
         time = System.currentTimeMillis();
         setConfigurations();
-        ArrayList<String> codingLines = new ArrayList<String>();
         // Preset
         for (int i=0;i<mnemonics.length;i++){
             mnemonics[i] = mnemonics[i].replace(" ","");
         }
-
+        
         try {
             if (args[0].substring(args[0].length()-4).equals(".txt")){
+                ArrayList<String> codingLines = new ArrayList<String>();
                 File from  = new File(args[0]);
                 Scanner read = null;
-                int init=0;
+                String[] entry;
+                int init = 0,j;
 
                 try {
                     read = new Scanner(from);
@@ -84,7 +66,7 @@ public class cst {
 
                 // Read the Memory
                 for (int i=0;i<codingLines.size();i++){
-                    String[] entry = codingLines.get(i).toUpperCase().split(" ");
+                    entry = codingLines.get(i).toUpperCase().split(" ");
                     entry[0] = entry[0].replace("H", "");
                     entry[1] = entry[1].replace("H", "");
                     if (i==0) init = integer(entry[0]);
@@ -93,12 +75,11 @@ public class cst {
                 PC = init;
                 // Execute
                 while (PC<Memory.size()){
-                    int j = 0;
+                    j = 0;
                     for (String code : codes){
                         if (code.equals(Memory.get(PC))) break;
                         j++;
                     }
-                    
 
                     if (PC+2<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),Memory.get(PC+2));
                     else if (PC+1<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),"_NONE_");
@@ -111,15 +92,13 @@ public class cst {
                     }
                     if (show_when_useOutput && mnemonicsReserved[j].equals("OUT byte")){
                         if (showAllOutputs_when_useOutput){
-                            System.out.println("OUT 3H : "+hex(outs[0])+"H ("+b2d(outs[0])+")");
-                            System.out.println("OUT 4H : "+hex(outs[1])+"H ("+b2d(outs[1])+")");
-                        }else System.out.println("OUT "+Memory.get(PC)+"H : "+hex(A)+"H ("+b2d(A)+")");
+                            System.out.println("OUT 3H : "+b2h(outs[0])+"H ("+b2d(outs[0])+")");
+                            System.out.println("OUT 4H : "+b2h(outs[1])+"H ("+b2d(outs[1])+")");
+                        }else System.out.println("OUT "+Memory.get(PC)+"H : "+b2h(A)+"H ("+b2d(A)+")");
                         if (delay_when_showAnd_useOutput) sleep(1);
                     }
                     PC++;
                 }
-
-                
             }else{
                 errors(2,"This format of input is not available");
             }
@@ -132,24 +111,30 @@ public class cst {
                 return;
             }
         }
-        System.out.printf("Read all of the memory\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",hex(A),b2d(A),hex(B),b2d(B),hex(C),b2d(C),hex(outs[0]),b2d(outs[0]),hex(outs[1]),b2d(outs[1]));
+        System.out.printf("Read all of the memory\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]),b2h(outs[1]),b2d(outs[1]));
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
     }
-    // Ececution
+
+    // Execution
 
     public static void clearTerminal(){
         for (int i=0;i<15;i++){
             System.out.println("\n");
         }
-        sleep(0.1666f);
+        sleep(0.01666f);
     }
 
     public static void sleep(float timeSleep){
-        try { Thread.sleep((int) (timeSleep*1000)); } catch (Exception e) {}
+        try { 
+            Thread.sleep((int) (timeSleep*1000));
+        } catch (Exception e) {
+            errors(13,"Occured a problem when using sleep, call the developer");
+        }
     }
 
     public static int execute(String entry, String first, String second){
         String a,b,c,r;
+
         switch (entry){
             case "80": // ADD B
                 A = sumB(A,B);
@@ -204,7 +189,8 @@ public class cst {
                 Memory.set(integer("FFFF")-1,address.substring(0,2));
                 return -1+integer(second+first)-PC;
             case "06": // MVI B,byte
-                B = h2b(first);return 1;
+                B = h2b(first);
+                return 1;
             case "2F": // CMA
                 a=A;
                 if (a.toCharArray()[0]=='1')a='0'+a.substring(1);
@@ -212,7 +198,8 @@ public class cst {
                 A=a;
                 break;
             case "0E": // MVI C,byte
-                C = h2b(first);return 1;
+                C = h2b(first);
+                return 1;
             case "3D": // DCR A
                 A = subB(A,"01");
                 setFlags("A");
@@ -255,12 +242,13 @@ public class cst {
                 setFlags("A");
                 return 1;
             case "DB": // IN byte
-                //System.out.print(":>'");
-                File stream1;
                 Scanner readKeyboard = null;
-
+                String input = "",number;
                 boolean is_hex = false;
-                String input = ""; 
+                FileWriter file;
+                File stream1;
+                System.out.print(":>");
+
                 while (true){
                     try {
                         stream1 = new File("Input.txt");
@@ -270,78 +258,55 @@ public class cst {
                     }
                     if (!(readKeyboard.hasNext())) continue;
                     input = readKeyboard.next();
-                    //System.out.println(input.length());
-                    
-
                     input = input.toUpperCase();
-                    //System.out.println(input+"'<:");
                     for (int i=0;i<input.length();i++) if (input.toCharArray()[i]=='H') is_hex=true;
-                    //System.out.println(is_hex);
                     if (is_hex){
-                        String number = "";
+                        number = "";
                         for (int i=0;i<input.length();i++){
                             if (input.toCharArray()[i]=='H') break;
                             number = number + input.toCharArray()[i];
                         }
-                        A=h2b(number);
+                        A = h2b(number);
                     }else{
                         a = d2b(input);
                         if (a.toCharArray()[0] == a.toCharArray()[1] && a.toCharArray()[0] == '0') A = toString(a.toCharArray()).substring(2);
                         else A = a;
                     }
-                    System.out.println("'"+A+"'");
                     break;
                 }
                 readKeyboard.close();
-                FileWriter stream2=null;
-                try {
-                    stream2 = new FileWriter("Input.txt");
-                    stream2.write("");
-                    stream2.close();
-                    //stream1 = new File("Input.txt");
-                    
-                    //readKeyboard = new Scanner(stream1);
-                }catch (Exception e){
-                    errors(11,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
-                }
-                //System.out.println("Clear");
-                //sleep(5);
-                //System.out.println("end");
-                try {
-                    FileWriter file = new FileWriter("Input.txt");
+                try { // Força a limpar Input.txt
+                    file = new FileWriter("Input.txt");
                     file.write("");
                     file.flush();
                     file.write("");
                     file.close();
-                    //System.out.println("...");
-
-                    //file.close();
                 }catch (Exception e){
-        
+                    errors(11,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
                 }
                 return 1;
             case "D3": // OUT byte
                 if (integer(first) == 3) outs[0] = A;
                 else if (integer(first) == 4) outs[1] = A;
-                else errors(9,"Can't use the port "+hex(first));
+                else errors(9,"Can't use the port "+b2h(first));
                 return 1;
             case "3C": // INR A
                 A = sumB(A,"01");
                 setFlags("A");
                 break;
             case "17": // RAL
-                a=A;
-                a=a.substring(1)+a.toCharArray()[0];
-                A=a;
+                a = A;
+                a = a.substring(1)+a.toCharArray()[0];
+                A = a;
                 break;
             case "04": // INR B
                 B = sumB(B,"01");
                 setFlags("B");
                 break;
             case "1F": // RAR
-                a=A;
-                a=a.toCharArray()[a.length()-1]+a.substring(0,a.length()-1);
-                A=a;
+                a = A;
+                a = a.toCharArray()[a.length()-1]+a.substring(0,a.length()-1);
+                A = a;
                 break;
             case "0C": // INR C
                 C = sumB(C,"01");
@@ -354,7 +319,8 @@ public class cst {
                 if (flagSignal == 1) return -1+(integer(second+first)-PC);
                 return 2;
             case "32": // STA address
-                Memory.set(integer(second+first),hex(A)); return 2;
+                Memory.set(integer(second+first),b2h(A));
+                return 2;
             case "C3": // JMP address
                 return -1+(integer(second+first)-PC);
             case "90": // SUB B
@@ -369,7 +335,7 @@ public class cst {
                 setFlags("A");
                 break;
             case "CA": // JZ address
-                if (flagZero == 1) return -1+(integer(second+first)-PC);
+                if (flagZero == 1) return -1+integer(second+first)-PC;
                 return 2;
             case "A8": // XRA B
                 b=h2b(first);a=A;r="";
@@ -380,7 +346,8 @@ public class cst {
                 setFlags("A");
                 break;
             case "3A": // LDA address
-                A = h2b(Memory.get(integer(second+first)));return 2;
+                A = h2b(Memory.get(integer(second+first)));
+                return 2;
             case "A9": // XRA C
                 c=h2b(first);a=A;r="";
                 while (a.length()<c.length())a=a.toCharArray()[0]+"0"+a.substring(1);
@@ -410,20 +377,16 @@ public class cst {
     }
 
     public static void finalizeIt(){
-        //System.out.println("---------");
-        try {
+        System.out.println("---------");
+        try { // Força a limpar Input.txt
             FileWriter file = new FileWriter("Input.txt");
             file.write("");
             file.write("");
             file.close();
-            File close = new File("Input.txt");
-
-            //file.close();
         }catch (Exception e){
-
+            errors(12,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
         }
-        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",hex(A),b2d(A),hex(B),b2d(B),hex(C),b2d(C),hex(outs[0]),b2d(outs[0]),hex(outs[1]),b2d(outs[1]));
-        //System.out.println("---------");
+        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]),b2h(outs[1]),b2d(outs[1]));
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
         System.exit(0);
     }
@@ -447,7 +410,6 @@ public class cst {
                 flagZero = 1;
                 if (b2d(C).toCharArray()[0] != '-') flagSignal = 0;
                 if (!(b2d(C).equals("0"))) flagZero = 0;
-                //System.out.println(flagSignal);
                 break;
         }
     }
@@ -458,7 +420,7 @@ public class cst {
         try {
             read = new Scanner(config);
         } catch (Exception e){
-            errors(4, "Can't open 'config.txt'\nCheck if this file exists and has the extension '.txt'");
+            errors(4, "Can't open config.txt\nCheck if this file exists and has the extension '.txt'");
         }
         ArrayList<String> lines = new ArrayList<String>();
         while (read.hasNextLine()){
@@ -503,7 +465,6 @@ public class cst {
                     break;
                 default:
                     errors(7,"Occured a problem when reading a configuration (configuration): '"+line+"'");
-
             }
         }
         read.close();
@@ -518,35 +479,31 @@ public class cst {
 
 
     public static String b2h(String a){
-        char[] parts = "....".toCharArray();
         String[] hexs = "0123456789ABCDEF".split("");
-        int j=0;
-        String result = "",got="";
-        //while (parts.length < 4) parts = (parts[0]+"0"+toString(parts).substring(1)).toCharArray();
-        //System.out.println(parts.length);
-        //System.out.println("a");
+        char[] parts = "....".toCharArray();
+        String result = "",got = "";
+        int j = 0,n;
+        
         for (int i=a.length()-1;i>=0;i--){
             parts[3-j] = a.toCharArray()[i];
             if (j==3){
-                int n = Integer.parseInt(b2d("0"+toString(parts)));
-                //System.out.println(n);
+                n = Integer.parseInt(b2d("0"+toString(parts)));
                 result = hexs[n]+result; 
                 j=0;
             }else j++;
         }
         if (j != 0){
             got = a.substring(0,j);
-            int n = Integer.parseInt(b2d("0"+got));
+            n = Integer.parseInt(b2d("0"+got));
             result = hexs[n]+result; 
         }
-        
-        //System.out.println(">:"+result);
         return result;
     }
 
     public static String b2d(String a){
         String result = "0",step1;
         int exp = 0,expNow;
+
         for (int i=a.length()-1;i>0;i--){
             expNow = exp;
             step1 = ""+a.toCharArray()[i];
@@ -562,19 +519,19 @@ public class cst {
     }
 
     public static String h2b(String a){
-        String b = "";
+        String b = "",result = "",got="";
         String[] hexs = "0123456789ABCDEF".split("");
-        String result = "",got="";
+        int p;
+
         for (int i=a.length()-1;i>=0;i--){
-            int p=0;
+            p = 0;
             for (String str : hexs){
                 if (str.equals(a.toCharArray()[i]+"")) break;
                 p++;
             }
             got = Integer.toString(p,2);
             while (got.length() < 4) got = "0"+got;
-            
-            b = got + b;// 
+            b = got + b;
         }
         result = b;
         return result;
@@ -586,6 +543,7 @@ public class cst {
         char[] al = a.toCharArray();
         String new_al = "";
         boolean read = false;
+
         if (al[0]=='-'){
             add = "11";
             al[0] = '0';
@@ -597,69 +555,51 @@ public class cst {
             new_al = new_al + c;
         }
         if (read) al = new_al.toCharArray();
-        //System.out.println(toString(al));
         if (add.equals("11")) while (!(b2d(value).equals(sig+toString(al)))) value = sumB(value,add);
         else while (!(b2d(value).equals(toString(al)))) value = sumB(value,add);
         return value;
     }
 
     public static String mult(String a,String b){
-        String result = "",step2= "";
-        String cacheZeros = "", cacheZerosA = "";
+        String result = "",step2= "",cacheZeros = "", cacheZerosA = "";
         int cache = 0,step1=0;
-        //if (min(a.length(),b.length()) == a.length() && a.length() != b.length()) return mult(b,a);
+
         for (int i=1;i<=b.length();i++){
             step2 = "";
             cacheZerosA = "";
             for (int j=1;j<=a.length();j++){
                 step1 = Integer.parseInt(""+b.toCharArray()[b.length()-i])*Integer.parseInt(""+a.toCharArray()[a.length()-j])+cache;
                 cache = 0;
-                if (step1 >= 10){
-                    cache = (step1-step1%10)/10;
-                }
+                if (step1 >= 10) cache = (step1-step1%10)/10;
                 step2 = ""+sum(""+step1%10+cacheZerosA+cacheZeros,step2);
-
-                
                 cacheZerosA += "0";
             }
-            //System.out.println(">"+step2);
-            
             result = sum(step2,result);
-           // System.out.println(":"+result);
             if (cache != 0) result = sum(cache+cacheZeros+cacheZerosA,result);
             cacheZeros += "0";
         }
         return result;
     }
 
-    public static String subB(String a,String b){
+    public static String subB(String a,String b){ // A-B (bin)
         if (b.length() < 4) while (b.length() < 4) b = b.toCharArray()[0]+"0"+b.substring(1);
         String br = (b.toCharArray()[0] == '0') ? '1'+b.substring(1) : '0'+b.substring(1);
         return sumB(a,br);
     }
 
-    public static String sumB(String a,String b){
-        
-
-        char sig=' ';
-        String result = "",value="";
-        String cache = "",ls_cache = "";
-        sig = a.toCharArray()[0];
+    public static String sumB(String a,String b){ // A+B (bin)
+        String result = "",value="",cache = "",ls_cache = "";
+        char sig=a.toCharArray()[0],mr;
+        boolean cont;
+        int soma;
         
         if (a.toCharArray()[0] == b.toCharArray()[0]){
-            if (min(a.length(),b.length()) == b.length()){
-                while (a.length() != b.length()){
-                    b = b.toCharArray()[0]+"0"+b.substring(1);
-                }
-            } else return sumB(b,a);
-            if (!(AmajB_ModBin(a,b))){
-                //System.out.println("Alriet"+a+" : "+b);
-                return sumB(b,a);
-            }
-            //System.out.println(a+"|"+b);
+            if (min(a.length(),b.length()) == b.length()) while (a.length() != b.length()) b = b.toCharArray()[0]+"0"+b.substring(1);
+            else return sumB(b,a);
+            if (!(AmajB_ModBin(a,b))) return sumB(b,a);
             for (int i=a.length()-1;i>=0;i--){
                 value = "0";
-                int soma = 0;
+                soma = 0;
                 soma += (a.toCharArray()[i] == '1') ? 1 : 0;
                 soma += (b.toCharArray()[i] == '1') ? 1 : 0;
                 soma += (cache == "1") ? 1 : 0;
@@ -670,18 +610,12 @@ public class cst {
                 result = value+result;
             }
         }else{
-            char mr = ' ';
-            boolean cont = false;
-            if (!(AmajB_ModBin(a,b))){
-                return sumB(b,a);
-            }
-            while (a.length() > b.length()){
-                b = b.toCharArray()[0]+"0"+b.substring(1);
-            }
-            //System.out.println(a+"|"+b);
+            mr = ' ';  // mini resultado
+            cont = false; // continue
+            if (!(AmajB_ModBin(a,b))) return sumB(b,a);
+            while (a.length() > b.length()) b = b.toCharArray()[0]+"0"+b.substring(1);
             for (int i=1;i<=min(a.length(),b.length());i++){
                 cont = false;
-                //System.out.println(a.toCharArray()[a.length()-(i)]+" "+(i));
                 if (a.toCharArray()[a.length()-i] == '1'){
                     if (b.toCharArray()[b.length()-i] == '1') mr = '0';
                     else mr = '1';
@@ -690,19 +624,15 @@ public class cst {
                     else{
                         int k = 1;
                         while (a.length()-(i+k)>=0){
-                            //System.out.println(a.toCharArray()[a.length()-(i+k)]+" "+(i));
                             char[] ar = a.toCharArray(),br = b.toCharArray();
                             ar[a.length()-(i+k-1)] = '1';
                             if (a.toCharArray()[a.length()-(i+k)] == '1'){
-                                
                                 br[b.length()-i] = '0';
                                 ar[a.length()-(i+k)] = '0';
-                                //ar[a.length()-(i)] = '1';
                                 b = toString(br);
                                 a = toString(ar);
                                 i--;
                                 cont = true;
-                                //System.out.println(i);
                                 break;
                             }
                             a = toString(ar);
@@ -712,14 +642,12 @@ public class cst {
                 }
                 if (cont) continue;
                 result = mr + result;
-                //System.out.println(result);
             }
         }
         if (ls_cache == "1") return sumB(a.toCharArray()[0] +"000"+ a,b.toCharArray()[0] +"000"+ b);
         result = sig + result.substring(1);
         return result;
     }
-    
 
     public static String dou(String a){
         String result = "";
@@ -754,27 +682,23 @@ public class cst {
         if (cache != 0) result = cache+result;
         return result;
     }
+
     public static int min(int a,int b){
         if (a > b) return b;
         return a;
     }
+
     public static String toString(char[] chars){
         String word = "";
-        for ( char c : chars){
-            word = word + c;
-        }
+        for ( char c : chars) word = word + c;
         return word;
     }
 
-    public static boolean AmajB_ModBin(String a,String b){ // Mínimo em módulo binário
+    public static boolean AmajB_ModBin(String a,String b){ // A>=B (em módulo binário)
         String br = b.substring(1),ar = a.substring(1);
-        while (ar.length() > br.length()){
-            br = "0"+br;
-        }
-        while (ar.length() < br.length()){
-            ar = "0"+ar;
-        }
-        //System.out.println(ar.length());
+        while (ar.length() > br.length()) br = "0"+br;
+        while (ar.length() < br.length()) ar = "0"+ar;
+        
         for (int i=0;i<ar.length();i++){
             if (ar.toCharArray()[i] == '1' && br.toCharArray()[i] == '0') return true;
             if (ar.toCharArray()[i] == '0' && br.toCharArray()[i] == '1') return false;
