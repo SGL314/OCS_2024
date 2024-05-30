@@ -284,8 +284,12 @@ public class cst {
                             number = number + input.toCharArray()[i];
                         }
                         A=h2b(number);
+                    }else{
+                        a = d2b(input);
+                        if (a.toCharArray()[0] == a.toCharArray()[1] && a.toCharArray()[0] == '0') A = toString(a.toCharArray()).substring(2);
+                        else A = a;
                     }
-                    else A = d2b(input);
+                    System.out.println("'"+A+"'");
                     break;
                 }
                 readKeyboard.close();

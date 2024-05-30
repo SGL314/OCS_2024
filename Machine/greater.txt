@@ -1,0 +1,38 @@
+mvi a,0Bh
+mov c,a
+mvi a,0Bh
+mov b,a
+out 4h
+mov a,c
+out 3h
+-------
+nop > greater
+sta < ga
+mov a,b
+sta < gb
+lda < ga
+-- eng1
+dcr b > eng1
+jz < gr_a
+dcr a
+jz < gr_b
+jmp < eng1
+
+-- results
+
+nop > gr_A
+mvi c,1h
+jmp < gr_ret
+
+nop > gr_B
+mvi c,0h  
+
+nop  > gr_ret
+lda < gb 
+mov b,a
+lda < ga
+hlt
+
+-- memory 
+nop > ga
+nop > gb

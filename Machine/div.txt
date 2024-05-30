@@ -1,9 +1,16 @@
-mvi a,2h
-sta < casas
+in 0h
 --
-mvi a,9h ;in 0h 
+inr a
+inr a
+out 3h
+sta < casas
+sta < st_casas
+--
+mvi a,0864h ;1863
+sta < sta
 mov c,a
-mvi a,2h ;in 1h 
+mvi a,0123h ; 295
+sta < stb
 mov b,a
 out 4h
 mov a,c
@@ -14,31 +21,9 @@ sta < a
 mov a,b
 sta < b
 lda < a
--- eng1
-dcr a > eng1
-jz < gr_b
-dcr b
-jz < gr_a
-jmp < eng1
 
--- results
-
-nop > gr_A
-lda < b
-mov b,a
-lda < a
+--ajustes
 mvi c,0h
-jmp < gt_eng2
-
-nop > gr_B
-lda < a
-mov b,a
-lda < b
-mvi c,0h
-jmp < gt_eng2
-
--- ajuste 
-nop  > gt_eng2
 sta < a
 mov a,b
 sta < b
@@ -51,20 +36,20 @@ sub b
 jz < multiplo
 jm < non_multiplo
 jmp < eng2
--- end
-mov a,c
-mvi b,0h
-mvi c,0h
-hlt > tot_end
+
 
 -- results 
 nop > multiplo
+mvi a,1h
+sta < is_mult
 lda < b
 mov b,a
 lda < a
 jmp < tot_end
 
 nop > non_multiplo
+mvi a,0h
+sta < is_mult
 lda < b
 mov b,a
 lda < a
@@ -72,10 +57,221 @@ dcr c
 jmp < tot_end
 
 
+nop > tot_end
+-- set_storage
+sta < a
+mov a,b
+sta < b
+mov a,c
+sta < c
+-- resultados_div
+lda < pos_mem
+sta <1 pos
+mov a,c
+call < pos
+-- 
+lda < is_mult
+dcr a
+jnz < next_casa_f
+--
+
+
+nop > next_casa_f
+-- get_storage
+lda < c
+mov c,a
+lda < b
+mov b,a
+-- next_casa
+lda < pos_mem
+inr a
+sta < pos_mem
+-- adjust
+lda < a
+mov a,c
+nop > next_casa_p
+-- INIT MULT
+call < mult_a_b
+--
+lda < a
+sub c
+mvi b,0Ah
+call < mult_a_b
+-- div again
+lda < casas
+dcr a
+jz < hlt
+sta < casas
+lda < b
+mov b,a
+mov a,c
+mvi c,0h > again
+call < sub_greater
+sta < tr
+mov a,c
+dcr a
+lda < tr
+jz < greater
+-- mult_again
+
+
+
+-- set_storage
+sta < a
+mov a,b
+sta < b
+mov a,c
+sta < c
+-- mult by 10 again
+lda < a
+mvi b,0Ah
+call < mult_a_b
+lda < b
+mov b,a
+mov a,c
+mvi c,0h
+-- set memory
+sta < tr
+lda < pos_mem
+inr a
+sta < pos_mem
+sta <1 pos
+mvi a,0h
+call < pos
+lda < tr
+
+jmp < again
+
+
+-- MULTIPLICATION --
+
+-- a:A,b:B -> a:A,b:B,a*b:C
+
+nop > mult_a_b
 -- memory
+jmp < iafm2
+nop > ma
+nop > mb
+nop > mr
+nop > iafm2
+
+sta < ma
+mov a,b
+sta < mb
+-- engine
+lda < ma
+mov b,a
+lda < mb
+mov c,a
+mvi a,0h
+-- loop
+nop > m_init
+add b 
+dcr c
+jnz < m_init
+-- loop
+mov c,a
+lda < mb
+mov b,a
+lda < ma
+ret
+
+-- GREATER -- 
+-- a:A,b:B -> a:A,b:B,c:(a>=b)?1:0
+
+
+-------
+nop > sub_greater
+sta < ga
+mov a,b
+sta < gb
+lda < ga
+-- eng1
+dcr b > greng1
+jz < gra
+dcr a
+jz < grb
+jmp < greng1
+
+-- results
+
+nop > grA
+mvi c,1h
+jmp < grret
+
+nop > grB
+mvi c,0h  
+
+nop  > grret
+lda < gb 
+mov b,a
+lda < ga
+ret
+
+-- memory 
+nop > ga
+nop > gb
+
+
+nop > hlt
+call < show_all
+lda < sta
+out 3h
+lda < stb
+out 4h
+lda 4002h
+mov c,a
+lda 4001h
+mov b,a
+lda < stb
+mov b,a
+lda < st_casas
+mov c,a
+dcr c
+dcr c
+lda <sta
+hlt
+
+-- memory all
+nop > is_mult
 nop >a
 nop >b
 nop >c
+nop > sta
+nop > stb
 nop > casas
+nop > st_casas
 nop > tr
-nop > mem
+nop > pos_mem
+
+-- guarda div
+sta 4000h > pos
+ret
+
+-- show_all_memorys of the division
+nop > show_all
+lda < st_casas
+sta < casas
+--
+mvi a,0h
+out 4h
+mvi a,0h
+out 3h
+mvi a,0h
+out 4h
+--
+nop > loop_s
+lda < casas
+dcr a 
+sta < casas
+jz < ret
+mov b,a
+lda < st_casas
+inr b
+sub b
+sta <1 pos_ind
+lda 4000h > pos_ind
+out 3h
+jmp < loop_s
+
+ret > ret
