@@ -50,9 +50,5 @@ for ast in keys.items():
     chaves.append(ast[0])
     valores.append(ast[1])
 
-# print("{",end="")    
-# for key in valores:
-#     print(f"\"{key}\"",end=",")
-# print("}")
 for key in chaves:
     print(key)
