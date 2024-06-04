@@ -83,12 +83,12 @@ public class acst{
     }
 
     public static void setConfigurations(){
-        File config = new File("config.txt");
+        File config = new File("Config.txt");
         Scanner read = null;
         try {
             read = new Scanner(config);
         } catch (Exception e){
-            errors(5, "Can't open 'config.txt'\nCheck if this file exists and has the extension '.txt'");
+            errors(5, "Can't open 'Config.txt'\nCheck if this file exists and has the extension '.txt'");
         }
         ArrayList<String> lines = new ArrayList<String>();
         while (read.hasNextLine()){

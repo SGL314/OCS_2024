@@ -415,12 +415,12 @@ public class cst {
     }
 
     public static void setConfigurations(){
-        File config = new File("config.txt");
+        File config = new File("Config.txt");
         Scanner read = null;
         try {
             read = new Scanner(config);
         } catch (Exception e){
-            errors(4, "Can't open config.txt\nCheck if this file exists and has the extension '.txt'");
+            errors(4, "Can't open 'Config.txt'\nCheck if this file exists and has the extension '.txt'");
         }
         ArrayList<String> lines = new ArrayList<String>();
         while (read.hasNextLine()){
@@ -477,7 +477,21 @@ public class cst {
 
 
 
-
+    public static void teste1(){
+        String a,b,soma,sub;
+        a = "0101";
+        b = "100000101";
+        soma = sumB(a,b);
+        System.out.println("><");
+        sub = subB(a,b);
+        System.out.println("><");
+        System.out.println(b2d(a)+"..."+b2d(b));
+        System.out.println(soma+":"+b2d(soma));
+        System.out.println((Integer.parseInt(b2d(a))+Integer.parseInt(b2d(b))));
+        System.out.println(sub+":"+b2d(sub));
+        System.out.println((Integer.parseInt(b2d(a))-Integer.parseInt(b2d(b))));
+    }
+    
     public static String b2h(String a){
         String[] hexs = "0123456789ABCDEF".split("");
         char[] parts = "....".toCharArray();
@@ -538,14 +552,14 @@ public class cst {
     }
 
     public static String d2b(String a){
-        String value = "00";char sig = ' ';
-        String add = "01";
+        String value = "0000";char sig = ' ';
+        String add = "0001";
         char[] al = a.toCharArray();
         String new_al = "";
         boolean read = false;
 
         if (al[0]=='-'){
-            add = "11";
+            add = "1001";
             al[0] = '0';
             sig = '-';
         }
@@ -555,7 +569,8 @@ public class cst {
             new_al = new_al + c;
         }
         if (read) al = new_al.toCharArray();
-        if (add.equals("11")) while (!(b2d(value).equals(sig+toString(al)))) value = sumB(value,add);
+        System.out.println(toString(al));
+        if (add.equals("1001")) while (!(b2d(value).equals(sig+toString(al)))) value = sumB(value,add);   
         else while (!(b2d(value).equals(toString(al)))) value = sumB(value,add);
         return value;
     }
@@ -644,7 +659,7 @@ public class cst {
                 result = mr + result;
             }
         }
-        if (ls_cache == "1") return sumB(a.toCharArray()[0] +"000"+ a,b.toCharArray()[0] +"000"+ b);
+        if (ls_cache == "1") return sumB(a.toCharArray()[0] +"0000"+ a.substring(1),b.toCharArray()[0] +"0000"+ b.substring(1));
         result = sig + result.substring(1);
         return result;
     }

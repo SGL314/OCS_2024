@@ -115,7 +115,7 @@ public class ast{
                 try {
                     setConfigurations();
                 } catch (Exception e){
-                    errors(9,"Occured a problem when reading 'config.txt'");
+                    errors(9,"Occured a problem when reading 'Config.txt'");
                 }
 
                 Scanner read = null;
@@ -452,12 +452,12 @@ public class ast{
     }
 
     public static void setConfigurations(){
-        File config = new File("config.txt");
+        File config = new File("Config.txt");
         Scanner read = null;
         try {
             read = new Scanner(config);
         } catch (Exception e){
-            errors(12, "Can't open 'config.txt'\nCheck if this file exists and has the extension '.txt'");
+            errors(12, "Can't open 'Config.txt'\nCheck if this file exists and has the extension '.txt'");
         }
         ArrayList<String> lines = new ArrayList<String>();
         while (read.hasNextLine()){
