@@ -263,12 +263,14 @@ public class cst {
                     if (is_hex){
                         number = "";
                         for (int i=0;i<input.length();i++){
-                            if (input.toCharArray()[i]=='H') break;
+                            if (input.toCharArray()[i]=='H')break;
                             number = number + input.toCharArray()[i];
                         }
                         A = h2b(number);
+                        System.out.println(number+"H");
                     }else{
                         A = d2b(input);
+                        System.out.println(input);
                     }
                     break;
                 }
@@ -282,6 +284,7 @@ public class cst {
                 }catch (Exception e){
                     errors(11,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
                 }
+                
                 return 1;
             case "D3": // OUT byte
                 if (integer(first) == 3) outs[0] = A;
@@ -567,10 +570,8 @@ public class cst {
             new_al = new_al + c;
         }
         if (read) al = new_al.toCharArray();
-        System.out.println(toString(al));
         if (add.equals("1001")) while (!(b2d(value).equals(sig+toString(al)))) value = sumB(value,add);   
         else while (!(b2d(value).equals(toString(al)))) value = sumB(value,add);
-        System.out.println(value);
         return value;
     }
 

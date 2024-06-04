@@ -137,9 +137,8 @@ public class ast{
                 for (int i=0;i<mnemonicsLines.size();i++){
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
                     chars = removeCommentary(chars);
-                    if (chars[0]=='#'){
+                    if (chars[0]=='#' && chars.length > 0){
                         blockComment = !(blockComment);
-                        System.out.println(blockComment+"-");
                         continue;
                     }
                     if (blockComment) continue;
@@ -178,9 +177,7 @@ public class ast{
                 blockComment = false;
                 for (int i=0;i<mnemonicsLines.size();i++){
                     chars = mnemonicsLines.get(i).toCharArray();
-                    
-                    System.out.println(blockComment);
-                    if (chars[0]=='#'){
+                    if (chars[0]=='#' && chars.length > 0){
                         blockComment = !(blockComment);
                         continue;
                     }
@@ -278,6 +275,7 @@ public class ast{
     }
 
     public static boolean isNotCommentary(char[] chars) {
+        
         if (chars.length >= 2){
             if (chars[0]==chars[1] && chars[0]=='-'){
                 return false;
@@ -457,6 +455,7 @@ public class ast{
         }
         return false;
     }
+    
     public static boolean isNumber(char c){
         char[] letters = "1234567890".toCharArray();
         for (char letter : letters){
