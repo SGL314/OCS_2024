@@ -1,3 +1,5 @@
-1000H DBH IN 0H
-1001H 0H
-1002H 76H HLT
+in 0h
+#
+mvi b,0Ah
+#
+hlt

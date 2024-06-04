@@ -14,6 +14,7 @@ public class ast{
     public static ArrayList<Pointer> pointers = new ArrayList<Pointer>();
     public static String[] mnemonicsReserved = mnemonics.clone();
     public static int differencePositionMemory = 0;
+    public static boolean blockComment = false;
     public static long time=0;
 
     // Errors 13
@@ -136,6 +137,12 @@ public class ast{
                 for (int i=0;i<mnemonicsLines.size();i++){
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
                     chars = removeCommentary(chars);
+                    if (chars[0]=='#'){
+                        blockComment = !(blockComment);
+                        System.out.println(blockComment+"-");
+                        continue;
+                    }
+                    if (blockComment) continue;
                     if (isNotCommentary(chars)){
                         position = getPositionMnemonic(chars);
                         if (hasAddressSetting(chars)){
@@ -168,10 +175,21 @@ public class ast{
                 codingLines = new ArrayList<String>();
 
                 // Reading
+                blockComment = false;
                 for (int i=0;i<mnemonicsLines.size();i++){
-                    mnemonicsLines.set(i,toString(removeCommentary(mnemonicsLines.get(i).toCharArray())));
+                    chars = mnemonicsLines.get(i).toCharArray();
+                    
+                    System.out.println(blockComment);
+                    if (chars[0]=='#'){
+                        blockComment = !(blockComment);
+                        continue;
+                    }
+                    if (blockComment) continue;
+                    
+                    mnemonicsLines.set(i,toString(removeCommentary(chars)));
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
                     chars = removeCommentary(chars);
+                    
                     if (isNotCommentary(chars)){
                         position = getPositionMnemonic(chars);
                         Config.addCoding_byConfig(position,i);

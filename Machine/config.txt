@@ -1,6 +1,6 @@
 ACST compileACST false
-ACST compileAST false
-ACST compileCST false
+ACST compileAST true
+ACST compileCST true
 AST upperAllLetters_when_showMnemonics true
 AST showMnemonics true
 AST showPointers true

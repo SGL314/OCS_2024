@@ -1,15 +1,17 @@
 in 0h
---
+#
+mvi a,0h
+#
 inr a
 inr a
 out 3h
 sta < casas
 sta < st_casas
 --
-mvi a,0864h ;1863
+mvi a,064h ;1863
 sta < sta
 mov c,a
-mvi a,0123h ; 295
+mvi a,023h ; 295
 sta < stb
 mov b,a
 out 4h
@@ -252,6 +254,7 @@ ret
 nop > show_all
 lda < st_casas
 sta < casas
+
 --
 mvi a,0h
 out 4h

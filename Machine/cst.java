@@ -247,7 +247,7 @@ public class cst {
                 boolean is_hex = false;
                 FileWriter file;
                 File stream1;
-                System.out.print(":>");
+                System.out.print(":> ");
 
                 while (true){
                     try {
@@ -268,9 +268,7 @@ public class cst {
                         }
                         A = h2b(number);
                     }else{
-                        a = d2b(input);
-                        if (a.toCharArray()[0] == a.toCharArray()[1] && a.toCharArray()[0] == '0') A = toString(a.toCharArray()).substring(2);
-                        else A = a;
+                        A = d2b(input);
                     }
                     break;
                 }
@@ -572,6 +570,7 @@ public class cst {
         System.out.println(toString(al));
         if (add.equals("1001")) while (!(b2d(value).equals(sig+toString(al)))) value = sumB(value,add);   
         else while (!(b2d(value).equals(toString(al)))) value = sumB(value,add);
+        System.out.println(value);
         return value;
     }
 

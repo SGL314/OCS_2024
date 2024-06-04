@@ -10,8 +10,8 @@ public class numberis {
     }
     public static void main (String[] args){
         String a,b,soma,sub;
-        a = "0";
-        System.out.println(d2b(a));
+        a = "0010";
+        System.out.println(b2d(a));
     }
     
     public static void teste1(){
