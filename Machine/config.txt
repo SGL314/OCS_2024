@@ -9,3 +9,4 @@ CST clearTerminal_when_stepInEachMnemonic false
 CST show_when_useOutput true
 CST delay_when_showAnd_useOutput false
 CST showAllOutputs_when_useOutput false
+CST noCut_when_stackOverflowHardware true

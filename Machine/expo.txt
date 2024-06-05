@@ -17,6 +17,7 @@ call < exp_a_b
 hlt
 
 -- exponenciacao
+
 nop > exp_a_b
 sta < m1
 sta < soma
@@ -42,10 +43,12 @@ jnz < loop1
 -- in loop 2
 sta < soma
 lda < qt_times
+out 4h
 dcr a
 sta < qt_times
 jnz < loop2
 -- end
 mov a,b > end
 mvi b,0h
+
 ret
