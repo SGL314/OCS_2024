@@ -1,3 +1,3 @@
-in 0h
-mov b,a
-hlt
+mvi a,03h >inicio
+hlt > fim
+
