@@ -1,20 +1,23 @@
 nop > m1
 -- setting
-mvi a,02h
-mvi b,00h > m2
+in 2h > m2
+sta <m1
+in 0h 
+mov b,a
+lda <m1
 -- saving
 out 03h > soma
 sta < m1
 mov a,b > qt_times
 out 4h
 lda < m1
+
 -- CODE
 call < exp_a_b
 hlt
 
 -- exponenciacao
 nop > exp_a_b
-
 sta < m1
 sta < soma
 mov a,b
@@ -24,8 +27,6 @@ sta < qt_times
 inr b
 dcr b
 jz < end
-
-
 -- set qt
 nop > loop2
 lda < m1
@@ -33,8 +34,6 @@ mov c,a
 lda < soma
 mov b,a
 mvi a,0h
-
-
 -- loop 1
 nop > loop1
 add b
@@ -49,5 +48,4 @@ jnz < loop2
 -- end
 mov a,b > end
 mvi b,0h
-
 ret

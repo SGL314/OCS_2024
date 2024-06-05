@@ -1,5 +1,3 @@
 in 0h
-#
-mvi b,0Ah
-#
+mov b,a
 hlt

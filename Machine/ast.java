@@ -137,10 +137,11 @@ public class ast{
                 for (int i=0;i<mnemonicsLines.size();i++){
                     chars = mnemonicsLines.get(i).toUpperCase().toCharArray();
                     chars = removeCommentary(chars);
-                    if (chars[0]=='#' && chars.length > 0){
-                        blockComment = !(blockComment);
-                        continue;
-                    }
+                    if (chars.length > 0)
+                        if (chars[0]=='#'){
+                            blockComment = !(blockComment);
+                            continue;
+                        }
                     if (blockComment) continue;
                     if (isNotCommentary(chars)){
                         position = getPositionMnemonic(chars);
@@ -177,10 +178,11 @@ public class ast{
                 blockComment = false;
                 for (int i=0;i<mnemonicsLines.size();i++){
                     chars = mnemonicsLines.get(i).toCharArray();
-                    if (chars[0]=='#' && chars.length > 0){
-                        blockComment = !(blockComment);
-                        continue;
-                    }
+                    if (chars.length > 0)
+                        if (chars[0]=='#'){
+                            blockComment = !(blockComment);
+                            continue;
+                        }
                     if (blockComment) continue;
                     
                     mnemonicsLines.set(i,toString(removeCommentary(chars)));

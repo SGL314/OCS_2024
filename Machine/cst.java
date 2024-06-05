@@ -81,6 +81,8 @@ public class cst {
                         j++;
                     }
 
+                    overflowHardware();
+
                     if (PC+2<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),Memory.get(PC+2));
                     else if (PC+1<Memory.size()) PC = PC + execute(Memory.get(PC),Memory.get(PC+1),"_NONE_");
                     else PC = PC + execute(Memory.get(PC),"_NONE_","_NONE_");
@@ -471,7 +473,23 @@ public class cst {
         read.close();
     }
 
-
+    public static void overflowHardware(){
+        if (A.length() > 8){
+            String last = A;
+            A = A.substring(A.length()-8);
+            System.out.println("A : Cutted from '"+last+"' to '"+A+"'");
+        } 
+        if (B.length() > 8){
+            String last = B;
+            B = B.substring(B.length()-8);
+            System.out.println("B : Cutted from '"+last+"' to '"+B+"'");
+        } 
+        if (C.length() > 8){
+            String last = C;
+            C = C.substring(C.length()-8);
+            System.out.println("C : Cutted from '"+last+"' to '"+C+"'");
+        } 
+    }
 
 
     // Numberis
