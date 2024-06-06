@@ -9,11 +9,12 @@ public class cst {
     public static String[] mnemonics = {"ADD B","MOV B,A","ADD C","MOV B,C","ANA B","MOV C,A","ANA C","MOV C,B","ANI byte","MVI A,byte","CALL address","MVI B,byte","CMA","MVI C,byte","DCR A","NOP","DCR B","ORA B","DCR C","ORA C","HLT","ORI byte","IN byte","OUT byte","INR A","RAL","INR B","RAR","INR C","RET","JM address","STA address","JMP address","SUB B","JNZ address","SUB C","JZ address","XRA B","LDA address","XRA C","MOV A,B","XRI byte","MOV A,C"};
     public static String[] codes = {"80","47","81","41","A0","4F","A1","48","E6","3E","CD","06","2F","0E","3D","00","05","B0","0D","BI","76","F6","DB","D3","3C","17","04","1F","0C","C9","FA","32","C3","90","C2","91","CA","A8","3A","A9","78","EE","79"};
     public static boolean stepMnemonic=true,clearTerminal_when_stepInEachMnemonic=false,delay_when_showAnd_useOutput=false,show_when_useOutput=false,showAllOutputs_when_useOutput=false,noCut_when_stackOverflowHardware=false;
-    public static String[] outs = {"00","00","00"},mnemonicsReserved = mnemonics.clone();
+    public static String[] outs = {"00","00"},mnemonicsReserved = mnemonics.clone();
     public static ArrayList<String> Memory = new ArrayList<String>();
     public static String A = "00", B = "00", C = "00";
     public static int PC = 0,flagSignal,flagZero;
     public static long time=0;
+    public static String version = "beta";
 
     // Errors 13
 
@@ -33,7 +34,7 @@ public class cst {
     }
 
     public static void main(String[] args){
-        System.out.println("\n__CST__");
+        System.out.println("\n__CST__"+version);
         time = System.currentTimeMillis();
         setConfigurations();
         // Preset
@@ -113,7 +114,8 @@ public class cst {
                 return;
             }
         }
-        System.out.printf("Read all of the memory\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]),b2h(outs[1]),b2d(outs[1]));
+        System.out.println("----------------------");
+        System.out.printf("Read all of the memory\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]));
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
     }
 
@@ -380,7 +382,7 @@ public class cst {
     }
 
     public static void finalizeIt(){
-        System.out.println("---------");
+        System.out.println("-------------");
         try { // Força a limpar Input.txt
             FileWriter file = new FileWriter("Input.txt");
             file.write("");
@@ -389,7 +391,7 @@ public class cst {
         }catch (Exception e){
             errors(12,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
         }
-        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]),b2h(outs[1]),b2d(outs[1]));
+        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]));
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
         System.exit(0);
     }

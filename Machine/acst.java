@@ -13,8 +13,9 @@ public class acst{
         System.exit(-1);
     }
     public static boolean[] onPresets = {true,true,true};
+    public static String version = "beta";
     public static void main(String[] args) {
-        System.out.println("\n__ACST__");
+        System.out.println("\n__ACST__"+version);
         String[] presets = "javac acst.java;javac ast.java;javac cst.java".split(";");
         ProcessBuilder processBuilder = new ProcessBuilder();
         String exec_ast = "java ast ";

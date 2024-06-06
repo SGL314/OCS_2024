@@ -1,4 +1,4 @@
-ACST compileACST false
+ACST compileACST true
 ACST compileAST true
 ACST compileCST true
 AST upperAllLetters_when_showMnemonics false

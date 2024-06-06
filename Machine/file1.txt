@@ -1,5 +1,6 @@
-mvi a,03h 
-jmp 1007h
-mvi a,04h
-hlt 
+lda < end
+jmp 2021h
+hlt >2 end
+
+
 

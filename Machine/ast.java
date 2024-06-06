@@ -16,6 +16,7 @@ public class ast{
     public static int differencePositionMemory = 0;
     public static boolean blockComment = false;
     public static long time=0;
+    public static String version = "beta";
 
     // Errors 13
 
@@ -90,7 +91,7 @@ public class ast{
     }
 
     public static void main(String[] args){
-        System.out.println("\n__AST__");
+        System.out.println("\n__AST__"+version);
         time = System.currentTimeMillis();
         // Preset
         for (int i=0;i<mnemonics.length;i++){
