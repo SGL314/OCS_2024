@@ -1,7 +1,7 @@
 ACST compileACST false
 ACST compileAST true
 ACST compileCST true
-AST upperAllLetters_when_showMnemonics true
+AST upperAllLetters_when_showMnemonics false
 AST showMnemonics true
 AST showPointers true
 CST stepInEachMnemonic false

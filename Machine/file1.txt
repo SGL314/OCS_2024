@@ -1,3 +1,5 @@
-mvi a,03h >inicio
-hlt > fim
+mvi a,03h 
+jmp 1007h
+mvi a,04h
+hlt 
 
