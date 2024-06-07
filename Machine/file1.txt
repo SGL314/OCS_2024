@@ -1,6 +1,4 @@
-lda < end
-jmp 2021h
-hlt >2 end
-
-
+mvi a,83h
+cma 
+hlt
 

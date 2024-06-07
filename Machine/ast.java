@@ -18,7 +18,7 @@ public class ast{
     public static long time=0;
     public static String version = "beta";
 
-    // Errors 13
+    // Errors 14
 
     public static class Pointer{
         int address;
@@ -30,9 +30,9 @@ public class ast{
     }
 
     public static class Config{
-        public static boolean showMnemonics;
-        public static boolean upperAllLetters_when_showMnemonics;
-        public static boolean showPointers;
+        public static boolean showMnemonics=false;
+        public static boolean upperAllLetters_when_showMnemonics=false;
+        public static boolean showPointers=false;
     
         public static void addCoding_byConfig(int positionCode,int positionLine){
             String mnemonicLine = mnemonicsLines.get(positionLine);
@@ -394,6 +394,29 @@ public class ast{
         return false;
     }
 
+    public static boolean isByte(String a){
+        String[] hexs = "0123456789ABCDEF".split("");
+        String b = "",result = "",got="";
+        boolean found =  false;
+        int p;
+
+        for (int i=a.length()-1;i>=0;i--){
+            p = 0;
+            for (String str : hexs){
+                if (str.equals(a.toCharArray()[i]+"")){
+                    found = true;
+                    break;
+                }
+                p++;
+            }
+            if (!(found)) return false;
+            got = Integer.toString(p,2);
+            while (got.length() < 4) got = "0"+got;
+            b = got + b;
+        }
+        return true;
+    }
+
     public static String getByte(char[] charsStrange,boolean hasTwoArguments){
         String word = "";
         for (char c : charsStrange){
@@ -403,7 +426,6 @@ public class ast{
         boolean toCount = false,breakWhenEncounterSpace = false;
         String cache = "";
         for (int i=0;i<chars.length;i++){
-            //System.out.println(chars[i]);
             if (toCount)
                 if (chars[i] != ' '){
                     breakWhenEncounterSpace = true;
@@ -416,7 +438,10 @@ public class ast{
             
             if (chars[i] == ',' && hasTwoArguments || chars[i] == ' ' && !(hasTwoArguments)) toCount = true;
         }
-        return cache;
+        if (isByte(cache))
+            return cache;
+        else errors(14,"Byte not identified : "+cache);
+        return "_NONE_";
     }
 
     public static String getUntil(String word, int position){
@@ -443,11 +468,10 @@ public class ast{
                 }
                 i++;
             }
-            //System.out.println(cache+qt);
             if (qt==1) break;
         }
-        if (position == -1) errors(1,"Mnemonic not identified\n"+cache+" ???");
-        else if (qt != 1) errors(7,"Mnemonic not definied\n"+cache+" is ambiguos");
+        if (position == -1 || qt == 0) errors(1,"Mnemonic not identified\n"+cache+" ???");
+        else if (qt > 1) errors(7,"Mnemonic not definied\n"+cache+" is ambiguos"+qt);
         return position;
     }
 
