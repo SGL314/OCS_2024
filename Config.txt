@@ -1,9 +1,9 @@
-ACST compileACST true
-ACST compileAST true
-ACST compileCST true
+ACST compileACST false
+ACST compileAST false
+ACST compileCST false
 
 AST upperAllLetters_when_showMnemonics false
-AST showMnemonics true
+AST showMnemonics false
 AST showPointers false
 
 CST stepInEachMnemonic false

@@ -1,4 +1,0 @@
-1000H 3EH mvi a,83h
-1001H 83H
-1002H 2FH cma
-1003H 76H hlt
