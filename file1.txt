@@ -1,26 +1,8 @@
--- SET VETOR
--- tamanho
-in 1h
-mov c,a
-mvi b,0h
-in 1h > set
-dcr c
-jnz < set_save
+mvi a,03h
+mvi c,02h
+mov b,a
+add c
 hlt
---
-sta 5000h > adr
-jmp < set
--- MEMORY
-nop > a
-nop > b
-nop > c
---
-sta < a
-mov a,b
-sta <1 adr
-inr b
-lda < a
-jmp < adr
 
 
 

@@ -8,6 +8,7 @@ import java.util.Scanner;
 public class acst{
 
     // Errors 8
+    private static String OS = "Linux"; // Windows Linux
     public static void errors(int error,String saida){
         System.out.printf("\nACST ERROR %03d : %s\n",error,saida);
         System.exit(-1);
@@ -47,7 +48,10 @@ public class acst{
                     i++;
                     if (!(onPresets[i])) continue;
                     System.out.println("Executing : "+preset);
-                    processBuilder.command("cmd.exe","/c",preset);
+                    if (OS.equals("Windows"))
+                        processBuilder.command("cmd.exe","/c",preset);
+                    else if (OS.equals("Linux"))
+                        processBuilder.command("/bin/bash","-c",preset);
                     process = processBuilder.start();
                     reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                     while ((line = reader.readLine()) != null) System.out.println(line);
@@ -58,7 +62,10 @@ public class acst{
 
             // AST
             try {
-                processBuilder.command("cmd.exe","/c",exec_ast);
+                if (OS.equals("Windows"))
+                    processBuilder.command("cmd.exe","/c",exec_ast);
+                else if (OS.equals("Linux"))
+                    processBuilder.command("/bin/bash","-c",exec_ast);
                 process = processBuilder.start();
                 reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 while ((line = reader.readLine()) != null) System.out.println(line);
@@ -68,7 +75,10 @@ public class acst{
             
             // CST
             try {
-                processBuilder.command("cmd.exe","/c",exec_cst);
+                if (OS.equals("Windows"))
+                    processBuilder.command("cmd.exe","/c",exec_cst);
+                else if (OS.equals("Linux"))
+                    processBuilder.command("/bin/bash","-c",exec_cst);
                 process = processBuilder.start();
                 reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
                 while ((line = reader.readLine()) != null) System.out.println(line);
