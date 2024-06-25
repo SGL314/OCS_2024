@@ -3,7 +3,7 @@ ACST compileAST false
 ACST compileCST false
 
 AST upperAllLetters_when_showMnemonics false
-AST showMnemonics false
+AST showMnemonics true
 AST showPointers false
 
 CST stepInEachMnemonic false

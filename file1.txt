@@ -1,8 +1,0 @@
-mvi a,03h
-mvi c,02h
-mov b,a
-add c
-hlt
-
-
-

@@ -8,7 +8,7 @@ import java.util.Scanner;
 public class acst{
 
     // Errors 8
-    private static String OS = "Windows"; // Windows Linux
+    private static String OS = "Linux"; // Windows Linux
     // Rode: javac acst.java para salvar
     public static void errors(int error,String saida){
         System.out.printf("\nACST ERROR %03d : %s\n",error,saida);
