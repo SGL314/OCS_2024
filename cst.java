@@ -300,7 +300,7 @@ public class cst {
                 return 1;
             case "D3": // OUT byte
                 if (integer(first) == 3) outs[0] = A;
-                else if (integer(first) == 4) System.out.println("Port Out 04H not yet implemented");
+                else if (integer(first) == 4) outs[1] = A;
                 else errors(9,"Can't use the port out "+first+"H");
                 return 1;
             case "3C": // INR A
@@ -399,7 +399,7 @@ public class cst {
         }catch (Exception e){
             errors(12,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
         }
-        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]));
+        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]),outs[1],b2d(outs[1]));
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
         System.exit(0);
     }
