@@ -1,0 +1,5 @@
+mvi a,02h
+out 04h
+mvi a,03h
+in 02h
+hlt

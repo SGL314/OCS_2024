@@ -293,7 +293,7 @@ public class cst {
                         errors(11,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
                     }
                 }else if (h2b(first).equals("00000010")){
-                    System.out.println("Port In 02H not yet implemented");
+                    A = outs[1];
                 }else{
                     errors(14,"Can't use the port in "+first+"H");
                 }
