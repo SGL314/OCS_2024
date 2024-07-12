@@ -1,0 +1,79 @@
+LDX #1
+STX $0711
+LDX #3
+STX $0721
+
+again:
+JSR get_cor
+TXA
+JSR get_pos
+STA $0300,X
+CPX #$20
+BNE again
+;JMP end
+JSR reset
+TYA
+ADC #$20
+TAY
+TAX
+STX $0711
+JSR get_ncor
+JMP again
+
+end:
+BRK
+
+
+
+get_pos:
+LDX $0711 ;reservaX
+INX
+STX $0711
+RTS
+
+reset:
+LDX #0
+LDA #0
+RTS
+
+get_cor:
+LDX $0721 ;cor
+;INX
+STX $0721
+RTS
+
+get_ncor:
+LDX $0721 ;cor
+INX
+STX $0721
+RTS
+
+
+BRK
+
+; NOTACAO
+; $ - hexadecimal
+; # - numero literal
+; : - define um label
+
+; MNEMONICOS
+; ---default---
+; _ - registrador
+; ld_
+; st_ - STorage in _
+; st_,X - STorage in _ and add X
+; t__ - Transfer _ to _
+; inx - INcrement X
+; dex - DEcrement X
+; cpx - ComPare if _ is equals to the byte (z?1:0)
+; brk - BReaK
+; adc - ADd value to A
+; ---jumpers---
+; bne - Branch Jump label z=0 (Brench Non Equals)
+; beq - Jump label z=1 (Branch EQuals)
+; jmp
+; jrs - jump subroutine
+; rts - return subroutine
+
+; MEMORIA
+; 0200 - pixels na tela
