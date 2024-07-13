@@ -1,24 +1,41 @@
-LDX #1
-STX $0711
-LDX #3
-STX $0721
+JSR TELA_BRANCA_margem
+BRK
 
+
+TELA_BRANCA_margem:
+  LDX #$0
+  STX $0710 ;tmpx
+  LDX #$0
+  STX $0711 ;tmpy
+
+  LDX #$20
+  STX $0722 ;resy (init linhas)
+  LDX #1
+  STX $0720 ;resa (cor)
+  LDX #$1e
+  STX $0731 ;stox (linhas)
+  JSR set_address
+
+setting:
+  LDX #$1e
 again:
-JSR get_cor
-TXA
-JSR get_pos
-STA $0300,X
-CPX #$20
+  JSR get_cor
+  JSR get_pos
+  JSR get_address
+  STA ($01),Y
+  CPX #$0
 BNE again
-;JMP end
+
 JSR reset
-TYA
-ADC #$20
+TXA
 TAY
-TAX
-STX $0711
-JSR get_ncor
-JMP again
+ADC #$20
+
+JSR reset
+JSR qt_vezes
+JSR reset
+JSR get_cor
+JMP setting
 
 end:
 BRK
@@ -26,20 +43,47 @@ BRK
 
 
 get_pos:
-LDX $0711 ;reservaX
-INX
-STX $0711
-RTS
+  DEX
+  LDY $0722
+  INY
+  STY $0722
+
+  STY $0712
+  STA $0710
+  TYA
+  ADC #$ff
+  ;verifying
+  CPY #$40
+  BEQ next_two_pos
+  CPY #$60
+  BEQ next_two_pos
+  CPY #$80
+  BEQ next_two_pos
+  CPY #$00
+  BEQ next_two_pos
+  ;
+  ret_get_pos:
+  LDA $0710
+  LDY $0712
+  
+  end_get_pos:
+  RTS
+
+next_two_pos:
+  STY $0722
+  RTS
+
 
 reset:
 LDX #0
+LDY #0
 LDA #0
 RTS
 
 get_cor:
-LDX $0721 ;cor
-;INX
-STX $0721
+LDY $0720 ;cor
+STY $0720
+TYA
 RTS
 
 get_ncor:
@@ -48,8 +92,34 @@ INX
 STX $0721
 RTS
 
+qt_vezes:
+LDX $0731
+DEX
+STX $0731
+TXA
+CPX #$0
+BEQ end
+RTS
 
-BRK
+get_address:
+CPY #$00
+BEQ add_address
+RTS
+
+set_address:
+LDX #$ff ;last
+STX $01
+LDX #$01 ;first
+STX $02
+RTS
+
+add_address:
+STX $0711
+LDX $02
+INX
+STX $02
+LDX $0711
+RTS
 
 ; NOTACAO
 ; $ - hexadecimal
