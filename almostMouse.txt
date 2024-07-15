@@ -1,0 +1,279 @@
+
+JSR setAddressMouse
+init:
+  JSR KEYS
+  JSR MOUSE
+  JMP init
+brk:
+  BRK
+
+JSR TELA_BRANCA_margem
+
+KEYS:
+  LDA $ff ;lê o buffer
+  CMP #$77
+  BEQ moveUp
+  CMP #$73
+  BEQ moveDown
+  CMP #$61
+  BEQ moveLeft
+  CMP #$64
+  BEQ moveRight
+  RTS
+moveUp:
+  JSR clear
+  LDA $03
+  SBC #$20
+  STA $03
+  JSR fflush
+  RTS
+moveDown:
+  JSR clear
+  LDA $03
+  ADC #$1f
+  TAX
+  STX $03
+  JSR fflush
+  RTS
+moveLeft:
+  LDA $03
+  CMP #$0
+  BEQ EmoveLeft
+  JSR clear
+  LDA $03
+  SBC #$1
+  TAX
+  STX $03
+  JSR fflush
+  EmoveLeft:
+  RTS
+moveRight:
+  JSR clear
+  LDA $03
+  ADC #0
+  TAX
+  STX $03
+  JSR fflush
+  RTS
+
+clear:
+  LDY #0
+  LDA #0
+  STA ($03),Y
+  RTS
+
+MOUSE:
+  LDA #1
+  LDY #$00
+  STA ($03),Y
+  RTS
+
+fflush:
+  LDA $ff
+  STA $fd
+  LDA #0
+  STA $ff
+  RTS
+
+
+
+setAddressMouse:
+  LDX #$0F
+  STX $03
+  LDX #$02
+  STX $04
+  RTS
+
+
+;define ASCII_w      $77
+;define ASCII_a      $61
+;define ASCII_s      $73
+;define ASCII_d      $64
+
+TELA_BRANCA_margem:
+  LDX #$0
+  STX $0710 ;tmpx
+  LDX #$0
+  STX $0711 ;tmpy
+
+  LDX #$1f
+  STX $0722 ;resy (init linhas)
+  LDX #1
+  STX $0720 ;resa (cor)
+  LDX #$1e
+  STX $0731 ;stox (linhas)
+  JSR set_address
+
+setting:
+  LDX #$1f
+again:
+  JSR get_cor
+  JSR get_pos
+  JSR get_address
+  STA ($01),Y
+  CPX #$0
+BNE again
+
+JSR reset
+TXA
+TAY
+ADC #$20
+
+JSR reset
+JSR qt_vezes
+BEQ end
+JSR reset
+JSR get_cor
+JMP setting
+
+end:
+  RTS
+
+
+get_pos:
+  DEX
+  LDY $0722
+  INY
+  STY $0722
+
+  STY $0712
+  STA $0710
+  TYA
+  ;ADC #$ff
+
+  ;verifying right
+  CPY #$20
+  BEQ next_two_pos
+  CPY #$40
+  BEQ next_two_pos
+  CPY #$60
+  BEQ next_two_pos
+  CPY #$80
+  BEQ next_two_pos
+  CPY #$a0
+  BEQ next_two_pos
+  CPY #$c0
+  BEQ next_two_pos
+  CPY #$e0
+  BEQ next_two_pos
+
+  ;verifying left
+  CPY #$01
+  BEQ next_two_pos
+  CPY #$21
+  BEQ next_pos
+  CPY #$41
+  BEQ next_two_pos
+  CPY #$61
+  BEQ next_two_pos
+  CPY #$81
+  BEQ next_two_pos
+  CPY #$a1
+  BEQ next_two_pos
+  CPY #$c1
+  BEQ next_two_pos
+  CPY #$e1
+  BEQ next_two_pos
+  CPY #$00
+  BEQ next_pos
+  ;
+
+  ret_get_pos:
+  LDA $0710
+  LDY $0712
+  LDY $0722
+  
+  end_get_pos:
+  RTS
+
+next_two_pos:
+  INY
+  STY $0722
+  RTS
+
+next_pos:
+  STY $0722
+  RTS
+
+one:
+  STA $0710
+  
+  LDA $0710
+  RTS
+
+duo:
+  STY $0722
+  RTS
+
+reset:
+  LDX #0
+  LDY #0
+  LDA #0
+  RTS
+
+get_cor:
+  LDY $0720 ;cor
+  STY $0720
+  TYA
+  RTS
+
+get_ncor:
+  LDX $0721 ;cor
+  INX
+  STX $0721
+  RTS
+
+qt_vezes:
+  LDX $0731
+  DEX
+  STX $0731
+  TXA
+  CPX #$0
+  RTS
+
+get_address:
+  CPY #$00
+  BEQ add_address
+  RTS
+
+set_address:
+  LDX #$ff ;last
+  STX $01
+  LDX #$01 ;first
+  STX $02
+  RTS
+
+add_address:
+  STX $0711
+  LDX $02
+  INX
+  STX $02
+  LDX $0711
+  RTS
+
+; NOTACAO
+; $ - hexadecimal
+; # - numero literal
+; : - define um label
+
+; MNEMONICOS
+; ---default---
+; _ - registrador
+; ld_
+; st_ - STorage in _
+; st_,X - STorage in _ and add X
+; t__ - Transfer _ to _
+; inx - INcrement X
+; dex - DEcrement X
+; cpx - ComPare if _ is equals to the byte (z?1:0)
+; brk - BReaK
+; adc - ADd value to A
+; ---jumpers---
+; bne - Branch Jump label z=0 (Brench Non Equals)
+; beq - Jump label z=1 (Branch EQuals)
+; jmp
+; jrs - jump subroutine
+; rts - return subroutine
+
+; MEMORIA
+; 0200 - pixels na tela
