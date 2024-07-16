@@ -25,6 +25,10 @@ end:
   STA $01
   LDA $02
   ADC #$0
+  CMP #$10
+  BNE save
+  LDA #0
+save:
   STA $02
   JMP init
   
