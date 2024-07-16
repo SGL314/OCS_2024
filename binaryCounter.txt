@@ -1,0 +1,35 @@
+init:
+  LDX #$00
+  STX $00
+  LDX #$02
+  STX $01
+
+loop:
+  LDY #0
+  LDA ($00),Y
+  CMP #1
+  BEQ pos1
+  TAX
+  INX
+  TXA
+  JMP pos2
+pos1:
+  LDA #0
+  STA ($00),Y
+  LDA $00
+  ADC #$0
+  STA $00
+  JMP loop
+pos2:
+  STA ($00),Y
+  JSR resetPos
+  JMP loop
+  RTS
+
+
+resetPos:
+  LDX #$00
+  STX $00
+  LDX #$02
+  STX $01
+  RTS
