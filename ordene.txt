@@ -1,0 +1,101 @@
+; 710s reserva
+; 720s cache
+; 732 distancia
+
+
+  LDY #$20
+  STY $0732
+  LDY $0
+putting:
+  LDA $fe
+  STA $0200,Y
+  INY
+  CPY #$20
+  BNE putting
+
+  LDY $0
+save:
+  LDA $0200,Y
+  STA $0220,Y
+  INY
+  CPY #$20
+  BNE save
+
+  JSR setAddress
+  JSR reset
+ordene:
+  LDY #1
+  LDA ($00),Y
+  TAX
+  STX $0711
+  LDY #0
+  LDA ($00),Y
+  STA $0710
+  JSR AjXY
+  LDA $0710
+  LDX $0711
+  CPY #1 ;comparacao
+  BEQ reflete
+  STA $0710 ;muda numeros
+  TXA
+  LDX $0710
+reflete:
+  LDY #0
+  STA ($00),Y
+  TXA
+  LDY #1
+  STA ($00),Y
+  
+  LDY $0732
+  DEY
+  CPY #0
+  BNE next
+  LDA #0
+  STA $00
+  JMP ordene
+  next:
+  LDA $00 ;new position
+  ADC #$0
+  STA $00
+  JMP ordene
+    
+  
+  
+  
+  BRK
+
+reset:
+  LDA #$00
+  TAX
+  TAY
+  RTS
+
+setAddress:
+  LDA #$00
+  STA $00
+  LDA #$02
+  STA $01
+  RTS
+
+AjXY:
+  ;reduz
+  STX $0721
+  TAX
+  DEX
+  TXA
+  LDX $0721
+  DEX
+  ;saida
+  CPX #0
+  BEQ yes
+  CMP #0
+  BEQ no
+  JMP AjXY
+  yes:
+  LDY #$01
+  JMP sair
+  no:
+  LDY #$00
+  JMP sair
+  sair:
+  RTS
