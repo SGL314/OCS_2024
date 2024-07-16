@@ -1,10 +1,13 @@
 ; 710s reserva
 ; 720s cache
 ; 732 distancia
+; 733 teto
 
 
-  LDY #$20
-  STY $0732
+  LDY #$1f
+  STY $0032
+  LDY #$1f
+  STY $0033
   LDY $0
 putting:
   LDA $fe
@@ -24,21 +27,23 @@ save:
   JSR setAddress
   JSR reset
 ordene:
+  LDY #3
+  LDA ($00),Y
   LDY #1
   LDA ($00),Y
   TAX
-  STX $0711
+  STX $0011
   LDY #0
   LDA ($00),Y
-  STA $0710
+  STA $0010
   JSR AjXY
-  LDA $0710
-  LDX $0711
+  LDA $0010
+  LDX $0011
   CPY #1 ;comparacao
   BEQ reflete
-  STA $0710 ;muda numeros
+  STA $0010 ;muda numeros
   TXA
-  LDX $0710
+  LDX $0010
 reflete:
   LDY #0
   STA ($00),Y
@@ -46,10 +51,17 @@ reflete:
   LDY #1
   STA ($00),Y
   
-  LDY $0732
+  LDY $0032
   DEY
+  STY $0032
   CPY #0
   BNE next
+  LDY $0033
+  DEY
+  STY $0033
+  STY $0032
+  CPY #0
+  BEQ total_sair
   LDA #0
   STA $00
   JMP ordene
@@ -79,11 +91,11 @@ setAddress:
 
 AjXY:
   ;reduz
-  STX $0721
+  STX $0021
   TAX
   DEX
   TXA
-  LDX $0721
+  LDX $0021
   DEX
   ;saida
   CPX #0
@@ -99,3 +111,5 @@ AjXY:
   JMP sair
   sair:
   RTS
+total_sair:
+  BRK
