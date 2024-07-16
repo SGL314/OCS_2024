@@ -1,0 +1,27 @@
+;---------
+LDY #1
+LDA preset,Y
+STA $00
+LDY #2
+LDA preset,Y
+STA $01
+preset:
+  LDY set1
+;---------
+JSR mudaz
+LDA #$07
+set1:
+  CMP #$03
+BEQ vasco
+LDY #$00
+BRK
+vasco:
+LDY #$01
+BRK
+mudaz:
+  LDY #1
+  TAX
+  LDA #$07
+  STA ($00),Y
+  TXA
+  RTS
