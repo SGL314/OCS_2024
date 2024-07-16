@@ -1,0 +1,30 @@
+LDA #00
+STA $00
+LDA #02
+STA $01
+;------
+init:
+  LDY #0
+  LDA $02
+loop:
+  STA ($00),Y
+  INY
+  CPY #$0
+  BEQ nextBlock
+  JMP loop
+nextBlock:
+  LDA $01
+  ADC #$0
+  STA $01
+  CMP #$06
+  BNE init
+end:
+  LDA #00
+  STA $00
+  LDA #02
+  STA $01
+  LDA $02
+  ADC #$0
+  STA $02
+  JMP init
+  
