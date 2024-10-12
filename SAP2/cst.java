@@ -14,7 +14,7 @@ public class cst {
     public static String A = "00", B = "00", C = "00";
     public static int PC = 0,flagSignal,flagZero;
     public static long time=0;
-    public static String version = "beta";
+    public static String version = "1.0";
 
     // Errors 15
 
@@ -96,8 +96,15 @@ public class cst {
                     if (show_when_useOutput && mnemonicsReserved[j].equals("OUT byte")){
                         if (showAllOutputs_when_useOutput){
                             System.out.println("OUT 3H : "+b2h(outs[0])+"H ("+b2d(outs[0])+")");
-                            System.out.println("OUT 4H : "+b2h(outs[1])+"H ("+b2d(outs[1])+")");
-                        }else System.out.println("OUT "+Memory.get(PC)+"H : "+b2h(A)+"H ("+b2d(A)+")");
+                            System.out.println("OUT 4H : "+outs[1]+"b ("+b2d(outs[1])+")");
+                        }else{
+                            int coe = Integer.parseInt(Memory.get(PC))-3;
+                            if (Memory.get(PC).equals("04")){
+                                System.out.println("OUT "+Memory.get(PC)+"H : "+outs[coe]+"b ("+b2d(outs[coe])+")"); // Adequação da saída, usando 'outs' invés de 'A'
+                            }else{
+                                System.out.println("OUT "+Memory.get(PC)+"H : "+b2h(outs[coe])+"H ("+b2d(outs[coe])+")"); // Adequação da saída, usando 'outs' invés de 'A'
+                            }
+                        }
                         if (delay_when_showAnd_useOutput) sleep(1);
                     }
                     PC++;
@@ -114,9 +121,7 @@ public class cst {
                 return;
             }
         }
-        System.out.println("----------------------");
-        System.out.printf("Read all of the memory\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]));
-        System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
+        finalizeIt(1);
     }
 
     // Execution
@@ -238,7 +243,7 @@ public class cst {
                 setFlags("A");
                 break;
             case "76": // HLT
-                finalizeIt();
+                finalizeIt(0);
                 break;
             case "F6": // ORI byte
                 c=h2b(first);a=A;r="";
@@ -389,8 +394,17 @@ public class cst {
         return 0;
     }
 
-    public static void finalizeIt(){
+    public static void finalizeIt(int tipo){
         System.out.println("-------------");
+        String message = "";
+        switch (tipo){
+            case 0:
+                message = "System halted";
+                break;
+            case 1:
+                message = "Read all of the memory";
+                break;
+        }
         try { // Força a limpar Input.txt
             FileWriter file = new FileWriter("Input.txt");
             file.write("");
@@ -399,7 +413,7 @@ public class cst {
         }catch (Exception e){
             errors(12,"Can't open Input.txt\nCheck if this file exists and has the extension '.txt'");
         }
-        System.out.printf("System halted\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nOUT 03H : %sH (%s)\nOUT 04H : %sH (%s)\n",b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),b2h(outs[0]),b2d(outs[0]),outs[1],b2d(outs[1]));
+        System.out.printf("%s\nA : %sH (%s)\nB : %sH (%s)\nC : %sH (%s)\nFlagSignal : %d\nFlag Zero : %d\nOUT 03H : %sH (%s)\nOUT 04H : %sb (%s)\n",message,b2h(A),b2d(A),b2h(B),b2d(B),b2h(C),b2d(C),flagSignal,flagZero,b2h(outs[0]),b2d(outs[0]),outs[1],b2d(outs[1]));
         System.out.println("Executed in " + (float) (System.currentTimeMillis()-time)/1000 + " seconds");
         System.exit(0);
     }
@@ -507,7 +521,6 @@ public class cst {
 
 
     // Numberis
-
 
 
     public static void teste1(){

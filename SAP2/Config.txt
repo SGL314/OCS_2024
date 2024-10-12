@@ -1,6 +1,6 @@
 ACST compileACST false
-ACST compileAST false
-ACST compileCST false
+ACST compileAST true
+ACST compileCST true
 
 AST upperAllLetters_when_showMnemonics false
 AST showMnemonics true
@@ -8,7 +8,7 @@ AST showPointers false
 
 CST stepInEachMnemonic false
 CST clearTerminal_when_stepInEachMnemonic false
-CST show_when_useOutput false
+CST show_when_useOutput true
 CST delay_when_showAnd_useOutput false
 CST showAllOutputs_when_useOutput false
 CST noCut_when_stackOverflowHardware false

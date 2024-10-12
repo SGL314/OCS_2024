@@ -1,5 +1,6 @@
-mvi a,02h
-out 04h
 mvi a,03h
-in 02h
+-- subtract
+mvi b,04h
+sub b
+;in 02h
 hlt

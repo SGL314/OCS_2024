@@ -16,7 +16,7 @@ public class ast{
     public static int differencePositionMemory = 0;
     public static boolean blockComment = false;
     public static long time=0;
-    public static String version = "beta";
+    public static String version = "1.0";
 
     // Errors 14
 
@@ -396,7 +396,7 @@ public class ast{
 
     public static boolean isByte(String a){
         String[] hexs = "0123456789ABCDEF".split("");
-        String b = "",result = "",got="";
+        String b = "",got="";
         boolean found =  false;
         int p;
 
